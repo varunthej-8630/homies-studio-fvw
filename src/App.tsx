@@ -9,8 +9,8 @@ import Process from './components/sections/Process';
 import Projects from './components/sections/Projects';
 import Crew from './components/sections/Crew';
 import About from './components/sections/About';
-import Pricing from './components/sections/comparison';
 import Contact from './components/sections/Contact';
+import Comparison from './components/sections/comparison';
 
 
 const App: React.FC = () => {
@@ -31,7 +31,7 @@ const App: React.FC = () => {
                   <Projects />
                   <Crew />
                   <About />
-                  <Pricing />
+                  <Comparison />
                   <Contact />
                 </>
               } />

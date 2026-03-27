@@ -1,10 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import CrewAvatar from '../ui/CrewAvatar';
-import type { Transition } from "framer-motion";
 
 // ================= DATA =================
+
+const coreTeam = [
+  {
+    id: 1,
+    name: 'Varun Thej',
+    role: 'Lead Engineer',
+    tagline: 'Building intelligent systems',
+    color: '#ffffff',
+    skills: ['IoT','System','C++'],
+    bio: 'Leads system architecture and embedded innovation.'
+  },
+  {
+    id: 2,
+    name: 'Sanidhyand',
+    role: 'Full Stack',
+    tagline: 'Turning ideas into products',
+    color: '#cccccc',
+    skills: ['React','Node'],
+    bio: 'Builds scalable web platforms.'
+  },
+  {
+    id: 3,
+    name: 'Teja Reddy',
+    role: 'Robotics',
+    tagline: 'Engineering smart machines',
+    color: '#aaaaaa',
+    skills: ['ROS','YOLO'],
+    bio: 'Develops robotics intelligence systems.'
+  }
+];
 
 const managers = [
   {
@@ -54,40 +83,40 @@ const developers = [
     color: '#888888',
     skills: ['ML','CV'],
     bio: 'Builds AI models and pipelines.'
-  },
-  {
-    id: 204,
-    name: 'Iot Engineer',
-    role: 'Developer',
-    tagline: 'Making systems intelligent',
-    color: '#888888',
-    skills: ['ML','CV'],
-    bio: 'Builds AI models and pipelines.'
-  }  
+  }
 ];
 
 // ================= AUDIO =================
 const clickAudio = new Audio('/hover.mp3');
 clickAudio.volume = 0.2;
 
-// ================= ANIMATION =================
-const spring: Transition = {
-  type: "spring",
-  stiffness: 120,
-  damping: 18,
-  mass: 0.6
-};
 // ================= COMPONENT =================
 
 const Crew = () => {
-  const [tab, setTab] = useState<'managers' | 'developers'>('developers');
+  const [tab, setTab] = useState<'core' | 'managers' | 'developers'>('core');
   const [selected, setSelected] = useState<any>(null);
   const [index, setIndex] = useState(0);
 
-  const data = tab === 'managers' ? managers : developers;
+  const data =
+    tab === 'core'
+      ? coreTeam
+      : tab === 'managers'
+      ? managers
+      : developers;
 
   const next = () => setIndex((prev) => (prev + 1) % data.length);
   const prev = () => setIndex((prev) => (prev - 1 + data.length) % data.length);
+
+  // 🔥 SCROLL CONTROL
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (e.deltaY > 0) next();
+      else prev();
+    };
+
+    window.addEventListener('wheel', handleWheel);
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, [data.length]);
 
   const handleClick = (member: any) => {
     clickAudio.currentTime = 0;
@@ -95,29 +124,20 @@ const Crew = () => {
     setSelected(member);
   };
 
-  const getVisibleCards = () => {
-    const prevIndex = (index - 1 + data.length) % data.length;
-    const nextIndex = (index + 1) % data.length;
-
-    return [
-      { ...data[prevIndex], position: 'left' },
-      { ...data[index], position: 'center' },
-      { ...data[nextIndex], position: 'right' }
-    ];
-  };
-
-  const visibleCards = getVisibleCards();
-
   return (
-    <section id="crew" className="bg-black text-white py-24 px-6 overflow-hidden">
+    <section className="bg-black text-white py-28 px-6 overflow-hidden">
 
       <div className="max-w-6xl mx-auto text-center">
 
-        <h2 className="text-5xl font-bold mb-6">The Homies.</h2>
+        {/* TITLE */}
+        <h2 className="text-5xl font-semibold tracking-tight mb-8">
+          The Homies.
+        </h2>
 
         {/* TABS */}
-        <div className="flex justify-center gap-4 mb-12">
+        <div className="flex justify-center gap-3 mb-16 flex-wrap">
           {[
+            { key: 'core', label: 'Core Team' },
             { key: 'managers', label: 'Homie Managers' },
             { key: 'developers', label: 'Homie Developers' }
           ].map((t) => (
@@ -127,10 +147,10 @@ const Crew = () => {
                 setTab(t.key as any);
                 setIndex(0);
               }}
-              className={`px-6 py-2 rounded-full border ${
+              className={`px-5 py-2 rounded-full text-sm transition-all duration-300 ${
                 tab === t.key
-                  ? 'bg-white text-black'
-                  : 'border-white/20 text-white/60'
+                  ? 'bg-white text-black shadow-lg'
+                  : 'bg-white/5 text-white/60 hover:bg-white/10'
               }`}
             >
               {t.label}
@@ -144,7 +164,7 @@ const Crew = () => {
           {/* LEFT */}
           <button
             onClick={prev}
-            className="absolute left-0 z-20 bg-white/10 hover:bg-white/20 px-4 py-3 rounded-full backdrop-blur-md"
+            className="absolute left-4 z-20 bg-white/5 hover:bg-white/10 px-4 py-3 rounded-full backdrop-blur-xl border border-white/10 transition"
           >
             ←
           </button>
@@ -152,79 +172,64 @@ const Crew = () => {
           {/* RIGHT */}
           <button
             onClick={next}
-            className="absolute right-0 z-20 bg-white/10 hover:bg-white/20 px-4 py-3 rounded-full backdrop-blur-md"
+            className="absolute right-4 z-20 bg-white/5 hover:bg-white/10 px-4 py-3 rounded-full backdrop-blur-xl border border-white/10 transition"
           >
             →
           </button>
 
           {/* CARDS */}
-          <AnimatePresence mode="popLayout">
-            {visibleCards.map((member) => {
+          <div className="relative w-full flex items-center justify-center">
 
-              let styles: any = {};
-
-              if (member.position === 'center') {
-                styles = {
-                  x: 0,
-                  scale: 1.15,
-                  opacity: 1,
-                  zIndex: 3
-                };
-              } else if (member.position === 'left') {
-                styles = {
-                  x: -280,
-                  scale: 0.8,
-                  opacity: 0.4,
-                  zIndex: 2
-                };
-              } else {
-                styles = {
-                  x: 280,
-                  scale: 0.8,
-                  opacity: 0.4,
-                  zIndex: 2
-                };
-              }
+            {data.map((member, i) => {
+              const position = i - index;
 
               return (
                 <motion.div
                   key={member.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={styles}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={spring}
-                  drag={member.position === 'center' ? "x" : false}
-                  dragElastic={0.25}
-                  dragConstraints={{ left: 0, right: 0 }}
-                  whileDrag={{ scale: 1.2 }}
-                  onDragEnd={(_, info) => {
-                    const threshold = 80;
-
-                    if (info.offset.x < -threshold) next();
-                    else if (info.offset.x > threshold) prev();
-                  }}
-                  className="absolute cursor-grab active:cursor-grabbing"
                   onClick={() => handleClick(member)}
+                  animate={{
+                    x: position * 260,
+                    scale: position === 0 ? 1.1 : 0.85,
+                    opacity: position === 0 ? 1 : 0.25,
+                    zIndex: 10 - Math.abs(position),
+                    filter: position === 0 ? 'blur(0px)' : 'blur(4px)'
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 90,
+                    damping: 18
+                  }}
+                  className="absolute cursor-pointer"
                 >
-                  <div className="w-[300px] bg-[#111] p-8 rounded-2xl border border-white/10 shadow-xl">
+                  <div className="w-[240px] bg-gradient-to-b from-white/[0.08] to-white/[0.02] 
+                  backdrop-blur-xl p-5 rounded-3xl border border-white/10 
+                  shadow-[0_10px_40px_rgba(0,0,0,0.6)]">
 
                     {/* AVATAR */}
-                    <div className="h-[200px] bg-black rounded-xl flex items-center justify-center mb-6">
+                    <div className="aspect-[4/5] bg-black/80 rounded-2xl flex items-center justify-center mb-4">
                       <CrewAvatar color={member.color} isHovered />
                     </div>
 
-                    <h3 className="text-lg font-semibold">{member.name}</h3>
-                    <p className="text-white/40 text-sm">{member.role}</p>
+                    {/* NAME */}
+                    <h3 className="text-base font-semibold tracking-wide">
+                      {member.name}
+                    </h3>
 
-                    <p className="text-xs text-white/50 mt-2 italic">
+                    <p className="text-white/40 text-xs">
+                      {member.role}
+                    </p>
+
+                    {/* TAGLINE */}
+                    <p className="text-[11px] text-white/40 mt-2 italic">
                       {member.tagline}
                     </p>
 
-                    <div className="flex gap-2 mt-4 flex-wrap justify-center">
+                    {/* SKILLS */}
+                    <div className="flex gap-1.5 mt-3 flex-wrap justify-center">
                       {member.skills.map((s: string) => (
                         <span
                           key={s}
-                          className="text-xs bg-white/5 px-3 py-1 rounded-full text-white/60"
+                          className="text-[10px] bg-white/5 px-2 py-0.5 rounded-full text-white/50"
                         >
                           {s}
                         </span>
@@ -235,8 +240,8 @@ const Crew = () => {
                 </motion.div>
               );
             })}
-          </AnimatePresence>
 
+          </div>
         </div>
       </div>
 
@@ -250,12 +255,12 @@ const Crew = () => {
             />
 
             <motion.div
-              initial={{ scale: 0.8, opacity: 0, y: 40 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 40 }}
-              transition={spring}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 120, damping: 20 }}
               className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-              w-[340px] bg-[#111] rounded-2xl p-6 text-center"
+              w-[320px] bg-[#111] rounded-2xl p-6 text-center border border-white/10"
             >
               <button
                 onClick={() => setSelected(null)}
@@ -276,14 +281,6 @@ const Crew = () => {
               <p className="mt-3 text-white/70 text-sm">
                 {selected.bio}
               </p>
-
-              <div className="flex gap-2 mt-4 flex-wrap justify-center">
-                {selected.skills.map((s: string) => (
-                  <span key={s} className="px-2 py-1 bg-white/10 rounded-full text-xs">
-                    {s}
-                  </span>
-                ))}
-              </div>
             </motion.div>
           </>
         )}
