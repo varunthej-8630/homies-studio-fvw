@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import CrewAvatar from '../ui/CrewAvatar';
@@ -107,17 +107,6 @@ const Crew = () => {
   const next = () => setIndex((prev) => (prev + 1) % data.length);
   const prev = () => setIndex((prev) => (prev - 1 + data.length) % data.length);
 
-  // 🔥 SCROLL CONTROL
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (e.deltaY > 0) next();
-      else prev();
-    };
-
-    window.addEventListener('wheel', handleWheel);
-    return () => window.removeEventListener('wheel', handleWheel);
-  }, [data.length]);
-
   const handleClick = (member: any) => {
     clickAudio.currentTime = 0;
     clickAudio.play().catch(() => {});
@@ -187,9 +176,15 @@ const Crew = () => {
                 <motion.div
                   key={member.id}
                   onClick={() => handleClick(member)}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  onDragEnd={(_, info) => {
+                    if (info.offset.x > 100) prev();
+                    else if (info.offset.x < -100) next();
+                  }}
                   animate={{
-                    x: position * 260,
-                    scale: position === 0 ? 1.1 : 0.85,
+                    x: position * (window.innerWidth < 640 ? 180 : 260),
+                    scale: position === 0 ? (window.innerWidth < 640 ? 1 : 1.1) : 0.85,
                     opacity: position === 0 ? 1 : 0.25,
                     zIndex: 10 - Math.abs(position),
                     filter: position === 0 ? 'blur(0px)' : 'blur(4px)'
@@ -206,8 +201,8 @@ const Crew = () => {
                   shadow-[0_10px_40px_rgba(0,0,0,0.6)]">
 
                     {/* AVATAR */}
-                    <div className="aspect-[4/5] bg-black/80 rounded-2xl flex items-center justify-center mb-4">
-                      <CrewAvatar color={member.color} isHovered />
+                    <div className="aspect-[4/5] bg-black/80 rounded-2xl flex items-center justify-center mb-4 overflow-hidden">
+                      <CrewAvatar color={member.color} isHovered={position === 0} isActive={Math.abs(position) <= 1} />
                     </div>
 
                     {/* NAME */}

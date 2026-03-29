@@ -14,6 +14,9 @@ const layerRef = useRef<HTMLDivElement | null>(null);
 
   // 🧠 INTERACTION
   const handleMove = (e: React.MouseEvent) => {
+    // Disable on mobile/touch
+    if (window.innerWidth < 768) return;
+
     if (!textRef.current || !glowRef.current || !particlesRef.current || !layerRef.current) return;
 
     const { innerWidth, innerHeight } = window;
@@ -62,15 +65,20 @@ const layerRef = useRef<HTMLDivElement | null>(null);
     if (!particlesRef.current) return;
 
     const particles = particlesRef.current?.children;
-if (!particles) return;
+    if (!particles) return;
 
-gsap.to(particles, {
+    const tween = gsap.to(particles, {
       x: "random(-50,50)",
       y: "random(-50,50)",
       duration: "random(4,8)",
       repeat: -1,
-      yoyo: true
+      yoyo: true,
+      overwrite: true
     });
+
+    return () => {
+      tween.kill();
+    };
   }, []);
 
   return (
@@ -108,7 +116,7 @@ gsap.to(particles, {
   {/* TITLE */}
   <motion.h1
     ref={textRef}
-    className="font-display font-extrabold text-[48px] md:text-[96px] leading-[0.9] tracking-tight text-black"
+    className="font-display font-extrabold text-[40px] sm:text-[48px] md:text-[96px] leading-[0.9] tracking-tight text-black"
   >
     <ScrambleText text="H-𝕆𝕄-IES STUᗡIO" trigger="auto" />
   </motion.h1>

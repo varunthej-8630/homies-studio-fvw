@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X, Check } from "lucide-react";
 
@@ -16,41 +16,30 @@ const Comparison: React.FC = () => {
   const [start, setStart] = useState(false);
   const [clash, setClash] = useState(false);
   const [showTable, setShowTable] = useState(false);
+  const [hasPlayed, setHasPlayed] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Trigger animation once
-  useEffect(() => {
-    const timer = setTimeout(() => setStart(true), 300);
-    return () => clearTimeout(timer);
-  }, []);
-
-// start animation
-useEffect(() => {
-  const t = setTimeout(() => setStart(true), 200);
-  return () => clearTimeout(t);
-}, []);
-
-// trigger clash
-useEffect(() => {
-  if (start) {
-    const t = setTimeout(() => {
+  const onViewportEnter = () => {
+    setStart(true);
+    setTimeout(() => {
       setClash(true);
-      audioRef.current?.play().catch(() => {});
-    }, 700);
-    return () => clearTimeout(t);
-  }
-}, [start]);
-
-// show table
-useEffect(() => {
-  if (clash) {
-    const t = setTimeout(() => setShowTable(true), 500);
-    return () => clearTimeout(t);
-  }
-}, [clash]);
+      if (!hasPlayed) {
+        audioRef.current?.play().catch(() => {});
+        setHasPlayed(true);
+      }
+    }, 800);
+    setTimeout(() => setShowTable(true), 1400);
+  };
 
   return (
-    <section id="comparison" className="py-24 bg-white px-6 md:px-12">
+    <motion.section 
+      id="comparison" 
+      className="py-24 bg-white px-6 md:px-12"
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, amount: 0.3 }}
+      onViewportEnter={onViewportEnter}
+    >
       <div className="max-w-[1600px] mx-auto">
         <div className="mb-10">
           <div className="font-mono text-xs text-text-secondary mb-4 underline decoration-accent-emerald underline-offset-4">
@@ -72,9 +61,9 @@ useEffect(() => {
     {/* LEFT BLOCK */}
     <motion.div
       initial={{ x: "-200%" }}
-      animate={start ? { x: clash ? "-15%" : "-60%" } : {}}
+      animate={start ? { x: clash ? "-10%" : (window.innerWidth < 640 ? "-40%" : "-60%") } : {}}
       transition={{ duration: clash ? 0.2 : 0.8, ease: "easeOut" }}
-      className="absolute text-gray-400 font-semibold text-lg"
+      className="absolute text-gray-400 font-semibold text-sm md:text-lg"
     >
       Others project makers 
     </motion.div>
@@ -82,9 +71,9 @@ useEffect(() => {
     {/* RIGHT BLOCK */}
     <motion.div
       initial={{ x: "200%" }}
-      animate={start ? { x: clash ? "15%" : "60%" } : {}}
+      animate={start ? { x: clash ? "10%" : (window.innerWidth < 640 ? "40%" : "60%") } : {}}
       transition={{ duration: clash ? 0.2 : 0.8, ease: "easeOut" }}
-      className="absolute text-black font-semibold text-lg"
+      className="absolute text-black font-semibold text-sm md:text-lg"
     >
       Homies Labs
     </motion.div>
@@ -181,7 +170,7 @@ useEffect(() => {
           We deliver systems that actually work.
         </p>
       </div>
-    </section>
+    </motion.section>
   );
 };
 

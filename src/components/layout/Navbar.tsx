@@ -9,6 +9,7 @@ import {
   Mail,
   Workflow
 } from 'lucide-react';
+import MobileMenu from './MobileMenu';
 
 const navItems = [
   { name: 'What Homies Do', href: 'services', icon: Wrench },
@@ -132,6 +133,9 @@ const Navbar = () => {
           );
         })}
       </nav>
+
+      {/* 🔥 MOBILE NAVIGATION (Burger Menu) */}
+      <MobileMenu />
     </>
   );
 };

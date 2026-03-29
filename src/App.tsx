@@ -16,7 +16,7 @@ import Comparison from './components/sections/comparison';
 const App: React.FC = () => {
   return (
     <Router>
-      <div className="relative min-h-screen bg-white text-text-primary overflow-x-hidden pr-0 lg:pr-[72px]">
+      <div className="relative min-h-screen bg-white text-text-primary overflow-x-hidden pr-0 md:pr-[72px]">
         <CustomCursor />
         <Navbar />
         

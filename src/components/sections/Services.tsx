@@ -62,10 +62,10 @@ const ServiceCard: React.FC<{ service: typeof services[0], index: number }> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 1, x: 40 }}
-      whileInView={{ opacity: 1, y: 1 }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.08, duration: 0.6 }}
+      transition={{ delay: index * 0.08, duration: 0.5 }}
       style={{ perspective: '1400px' }}
     >
       <div
