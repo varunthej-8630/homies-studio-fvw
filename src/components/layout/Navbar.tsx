@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import {
   Wrench,
   Briefcase,
@@ -26,7 +25,6 @@ const navItems = [
 
 const Navbar = () => {
   const [active, setActive] = useState('');
-  const [hovered, setHovered] = useState<number | null>(null);
   const { mode, toggleMode } = useTheme();
 
   useEffect(() => {
@@ -59,15 +57,13 @@ const Navbar = () => {
       {/* 🔥 NAV (Desktop Only) */}
       <nav className="hidden md:flex fixed left-4 top-1/2 -translate-y-1/2 flex-col gap-2 z-[999] bg-[var(--nav-bg)] border border-[var(--border)] rounded-2xl py-4 px-2.5 shadow-xl transition-all duration-300">
         
-        {navItems.map((item, i) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = active === item.href;
 
           return (
             <div
               key={item.name}
-              onMouseEnter={() => setHovered(i)}
-              onMouseLeave={() => setHovered(null)}
               onClick={() => scrollToSection(item.href)}
               className="relative flex items-center justify-center group"
             >
