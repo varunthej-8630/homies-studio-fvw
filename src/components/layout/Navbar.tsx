@@ -7,80 +7,58 @@ import {
   Info,
   Scale,
   Mail,
-  Workflow
+  Workflow,
+  Moon,
+  Sun,
+  PhoneCall
 } from 'lucide-react';
-import MobileMenu from './MobileMenu';
+import { useTheme } from '../../context/ThemeContext';
 
 const navItems = [
-  { name: 'What Homies Do', href: 'services', icon: Wrench },
-  { name: 'Homies Process', href: 'process', icon: Workflow },
-  { name: 'Homies Works', href: 'work', icon: Briefcase },
-  { name: 'Homies Crew', href: 'crew', icon: Users },
-  { name: 'About Homies', href: 'about', icon: Info },
-  { name: 'Comparison', href: 'comparison', icon: Scale },
-  { name: 'Contact Homies', href: 'contact', icon: Mail },
+  { name: 'Services', href: 'services', icon: Wrench },
+  { name: 'Process', href: 'process', icon: Workflow },
+  { name: 'Works', href: 'work', icon: Briefcase },
+  { name: 'Crew', href: 'crew', icon: Users },
+  { name: 'About', href: 'about', icon: Info },
+  { name: 'VS', href: 'comparison', icon: Scale },
+  { name: 'Contact', href: 'contact', icon: Mail },
 ];
 
 const Navbar = () => {
   const [active, setActive] = useState('');
   const [hovered, setHovered] = useState<number | null>(null);
-  const [progress, setProgress] = useState(0);
+  const { mode, toggleMode } = useTheme();
 
-  // 🔥 SCROLL DETECTION
   useEffect(() => {
     const handleScroll = () => {
       let current = '';
-
       navItems.forEach((item) => {
         const el = document.getElementById(item.href);
         if (!el) return;
-
         const rect = el.getBoundingClientRect();
-
         if (rect.top <= window.innerHeight * 0.4 && rect.bottom >= window.innerHeight * 0.4) {
           current = item.href;
         }
       });
-
       setActive(current);
-
-      // PROGRESS
-      const scrollTop = window.scrollY;
-      const height = document.body.scrollHeight - window.innerHeight;
-      setProgress(scrollTop / height);
     };
 
     window.addEventListener('scroll', handleScroll);
     handleScroll();
-
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 🔥 SMOOTH SCROLL FIX
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
-
-    const y = el.getBoundingClientRect().top + window.scrollY - 80;
-
-    window.scrollTo({
-      top: y,
-      behavior: 'smooth',
-    });
+    el.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
     <>
-      {/* 🔥 PROGRESS BAR */}
-      <motion.div
-        className="fixed right-3 top-0 w-[2px] bg-black/40 z-50 origin-top"
-        style={{ scaleY: progress }}
-      />
-
-      {/* 🔥 NAV */}
-      <nav className="fixed right-6 top-1/2 -translate-y-1/2 z-50 hidden md:flex flex-col gap-3 p-3
-      bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
-
+      {/* 🔥 NAV (Desktop Only) */}
+      <nav className="hidden md:flex fixed left-4 top-1/2 -translate-y-1/2 flex-col gap-2 z-[999] bg-[var(--nav-bg)] border border-[var(--border)] rounded-2xl py-4 px-2.5 shadow-xl transition-all duration-300">
+        
         {navItems.map((item, i) => {
           const Icon = item.icon;
           const isActive = active === item.href;
@@ -91,51 +69,46 @@ const Navbar = () => {
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(null)}
               onClick={() => scrollToSection(item.href)}
-              className="relative flex items-center justify-center cursor-pointer"
+              className="relative flex items-center justify-center group"
             >
-
-              {/* ACTIVE INDICATOR */}
-              {isActive && (
-                <motion.div
-                  layoutId="active-pill"
-                  className="absolute inset-0 bg-black rounded-xl"
-                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                />
-              )}
-
-              {/* ICON */}
-              <motion.div
-                animate={{
-                  scale: hovered === i ? 1.15 : 1,
-                }}
-                transition={{ type: 'spring', stiffness: 300 }}
-                className={`relative z-10 p-3 rounded-xl transition-all
-                ${isActive ? 'text-white' : 'text-black/60 hover:text-black'}`}
+              <button
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 relative z-10
+                ${isActive 
+                  ? 'bg-[var(--text)] text-[var(--bg)]' 
+                  : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--border)]'}`}
               >
-                <Icon size={18} />
-              </motion.div>
+                <Icon size={16} />
+              </button>
 
               {/* TOOLTIP */}
-              <motion.div
-                initial={{ opacity: 0, x: 10 }}
-                animate={{
-                  opacity: hovered === i ? 1 : 0,
-                  x: hovered === i ? -8 : 0,
-                }}
-                transition={{ duration: 0.2 }}
-                className="absolute right-full mr-3 px-3 py-1.5 text-xs rounded-md
-                bg-black text-white whitespace-nowrap pointer-events-none shadow-lg"
+              <div
+                className={`absolute left-full ml-3 px-3 py-1.5 text-[10px] uppercase font-bold tracking-widest rounded-md
+                bg-[var(--text)] text-[var(--bg)] whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-200 shadow-xl`}
               >
                 {item.name}
-              </motion.div>
-
+              </div>
             </div>
           );
         })}
-      </nav>
 
-      {/* 🔥 MOBILE NAVIGATION (Burger Menu) */}
-      <MobileMenu />
+        <div className="my-2 h-[1px] bg-[var(--border)] w-full" />
+
+        {/* THEME TOGGLE */}
+        <button
+          onClick={toggleMode}
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--border)] transition-all duration-200"
+        >
+          {mode === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
+
+        {/* CALL ACTION */}
+        <button
+          onClick={() => window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=Hi%20Homies%2C%20I%20want%20to%20book%20a%20call`, '_blank')}
+          className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--text)] text-[var(--bg)] hover:opacity-90 transition-all duration-200"
+        >
+          <PhoneCall size={16} />
+        </button>
+      </nav>
     </>
   );
 };

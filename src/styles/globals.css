@@ -1,33 +1,104 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono&family=Playfair+Display:ital@1&display=swap');
-
 @import "tailwindcss";
+
 :root {
+  --bg: #000000;
+  --surface: #0D0D0D;
+  --card: #111111;
+  --card-hover: #161616;
+  --border: rgba(255,255,255,0.07);
+  --border-hover: rgba(255,255,255,0.18);
+  --text: #FFFFFF;
+  --text-muted: #888888;
+  --text-faint: #444444;
+  --nav-bg: #141414;
+  --accent: #FFFFFF;
+  --floating-icon: rgba(255,255,255,0.13);
+  
   --font-display: 'Syne', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   --font-accent: 'Playfair Display', serif;
 }
 
-body {
+html.light {
+  --bg: #F2F0EB;
+  --surface: #ECEAE4;
+  --card: #E4E2DC;
+  --card-hover: #DEDAD3;
+  --border: rgba(0,0,0,0.07);
+  --border-hover: rgba(0,0,0,0.18);
+  --text: #0A0A0A;
+  --text-muted: #555550;
+  --text-faint: #999990;
+  --nav-bg: #FFFFFF;
+  --accent: #0A0A0A;
+  --floating-icon: rgba(0,0,0,0.12);
+}
+
+*, *::before, *::after { 
+  box-sizing: border-box; 
+}
+
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+html, body, #root {
   margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+body {
   font-family: var(--font-body);
-  background-color: #FFFFFF;
-  color: #0A0A0A;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-html {
-  font-size: 16px;
+/* CUSTOM CURSOR SYSTEM */
+* { cursor: none !important; }
+
+#hs-cursor {
+  position: fixed;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  z-index: 999999;
+  transform: translate(-50%, -50%);
+  transition: width 0.18s ease, 
+              height 0.18s ease,
+              transform 0.08s linear;
+  will-change: transform;
 }
 
-body {
-  margin: 0;
-  padding: 0;
+#hs-cursor.hovered {
+  width: 56px;
+  height: 56px;
 }
 
-* {
-  box-sizing: border-box;
+@media (hover: none) { 
+  #hs-cursor { display: none; } 
+  * { cursor: auto !important; }
 }
 
-/* Custom Cursor styles will go here or in cursor.css */
+/* NOISE TEXTURE UTILITY */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* SCROLLBAR UI */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { X, Check } from "lucide-react";
 
@@ -16,159 +16,133 @@ const Comparison: React.FC = () => {
   const [start, setStart] = useState(false);
   const [clash, setClash] = useState(false);
   const [showTable, setShowTable] = useState(false);
-  const [hasPlayed, setHasPlayed] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const onViewportEnter = () => {
     setStart(true);
-    setTimeout(() => {
-      setClash(true);
-      if (!hasPlayed) {
-        audioRef.current?.play().catch(() => {});
-        setHasPlayed(true);
-      }
-    }, 800);
+    setTimeout(() => setClash(true), 800);
     setTimeout(() => setShowTable(true), 1400);
   };
 
   return (
     <motion.section 
       id="comparison" 
-      className="py-24 bg-white px-6 md:px-12"
+      className="py-24 md:py-40 bg-[var(--bg)] text-[var(--text)] px-6 md:px-12 selection:bg-[var(--text)] selection:text-[var(--bg)] overflow-hidden transition-colors duration-500 relative"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
-      viewport={{ once: true, amount: 0.3 }}
+      viewport={{ once: true, amount: 0.1 }}
       onViewportEnter={onViewportEnter}
     >
-      <div className="max-w-[1600px] mx-auto">
-        <div className="mb-10">
-          <div className="font-mono text-xs text-text-secondary mb-4 underline decoration-accent-emerald underline-offset-4">
-            06 / Comparison
-          </div>
-          <h2 className="font-display font-extrabold text-4xl md:text-5xl lg:text-6xl mb-6">
-            Why We Homies Stand Out
-          </h2>
-          <p className="font-body text-xl text-text-secondary max-w-2xl">
-              We don't just deliver code. We deliver systems that actually work.
+      {/* BACKGROUND DECOR */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-7xl bg-[radial-gradient(circle_at_center,var(--floating-icon)_0%,transparent_70%)] opacity-20 pointer-events-none" />
+
+      <div className="max-w-[1440px] mx-auto relative z-10">
+        <div className="mb-20 text-center md:text-left">
+          <p className="font-mono text-[9px] md:text-xs text-[var(--text-faint)] mb-4 uppercase tracking-[0.4em]">
+            06 / The Homies Edge
           </p>
-      </div>
-      </div>
+          <h2 className="font-display font-black text-[clamp(42px,7vw,100px)] mb-8 leading-[0.9] tracking-tighter uppercase whitespace-pre-line">
+            Why Homies <br /> Stand Out.
+          </h2>
+          <p className="font-body text-lg md:text-2xl text-[var(--text-muted)] max-w-3xl font-light leading-relaxed mx-auto md:mx-0">
+            We don't just deliver code. We deliver industrial-grade systems designed to survive real-world chaos.
+          </p>
+        </div>
 
-      {/* CLASH STAGE */}
-{!showTable && (
-  <div className="relative h-[160px] flex items-center justify-center overflow-hidden">
+        {/* CLASH STAGE (Animated VS) */}
+        {!showTable && (
+          <div className="relative h-[250px] md:h-[300px] flex items-center justify-center overflow-hidden mb-20 bg-[var(--surface)] rounded-[3rem] md:rounded-[4rem] border border-[var(--border)] shadow-inner">
+            <motion.div
+              initial={{ x: "-200%" }}
+              animate={start ? { x: clash ? "-20%" : "-60%" } : {}}
+              transition={{ duration: clash ? 0.2 : 0.8, ease: "easeOut" }}
+              className="absolute text-[var(--text-faint)] font-black text-xl md:text-4xl uppercase tracking-tighter italic"
+            >
+              Average Agencies
+            </motion.div>
 
-    {/* LEFT BLOCK */}
-    <motion.div
-      initial={{ x: "-200%" }}
-      animate={start ? { x: clash ? "-10%" : (window.innerWidth < 640 ? "-40%" : "-60%") } : {}}
-      transition={{ duration: clash ? 0.2 : 0.8, ease: "easeOut" }}
-      className="absolute text-gray-400 font-semibold text-sm md:text-lg"
-    >
-      Others project makers 
-    </motion.div>
+            <motion.div
+              initial={{ x: "200%" }}
+              animate={start ? { x: clash ? "20%" : "60%" } : {}}
+              transition={{ duration: clash ? 0.2 : 0.8, ease: "easeOut" }}
+              className="absolute text-[var(--text)] font-black text-xl md:text-4xl uppercase tracking-tighter italic"
+            >
+              Homies Studio
+            </motion.div>
 
-    {/* RIGHT BLOCK */}
-    <motion.div
-      initial={{ x: "200%" }}
-      animate={start ? { x: clash ? "10%" : (window.innerWidth < 640 ? "40%" : "60%") } : {}}
-      transition={{ duration: clash ? 0.2 : 0.8, ease: "easeOut" }}
-      className="absolute text-black font-semibold text-sm md:text-lg"
-    >
-      Homies Labs
-    </motion.div>
-
-    {/* CENTER IMPACT */}
-    {clash && (
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: [0, 1.6, 0.8] }}
-        transition={{ duration: 0.4 }}
-        className="absolute w-12 h-12 rounded-full bg-black/10"
-      />
-    )}
-
-    {/* FLASH LINE */}
-    {clash && (
-      <motion.div
-        initial={{ opacity: 0, scaleY: 0 }}
-        animate={{ opacity: [0, 1, 0], scaleY: [0, 1.5, 0] }}
-        transition={{ duration: 0.3 }}
-        className="absolute w-[2px] h-16 bg-black"
-      />
-    )}
-
-    {/* VS POP */}
-    <motion.div
-      initial={{ scale: 0 }}
-      animate={{
-        scale: clash ? [1, 1.5, 1] : 0,
-        opacity: clash ? 1 : 0,
-      }}
-      transition={{ duration: 0.3 }}
-      className="text-xl font-bold z-10"
-    >
-      VS
-    </motion.div>
-
-  </div>
-)}
-
-      {/* TABLE */}
-      {showTable && (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-4xl mx-auto border border-gray-200 rounded-xl shadow-sm px-5 py-4"
-        >
-          <div className="grid grid-cols-2 mb-4">
-
-  <div className="text-gray-400 text-sm md:text-base font-semibold tracking-[0.12em] uppercase">
-    Others project makers
-  </div>
-
-  <div className="text-black text-right text-sm md:text-base font-bold tracking-[0.12em] uppercase">
-    Homies
-  </div>
-
-</div>
-
-          <div className="divide-y divide-gray-100">
-            {points.map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="grid grid-cols-2 items-center py-3"
-              >
-                <div className="flex items-center gap-2 text-gray-500">
-                  <div className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100">
-                    <X size={12} />
-                  </div>
-                  <span className="text-sm">{item.others}</span>
-                </div>
-
-                <div className="flex items-center justify-end gap-2 text-black font-medium">
-                  <span className="text-sm">{item.ours}</span>
-                  <div className="w-6 h-6 flex items-center justify-center rounded-full bg-black text-white">
-                    <Check size={12} />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+            <motion.div
+              initial={{ scale: 0, rotate: -45 }}
+              animate={{
+                scale: clash ? [1, 1.8, 1] : 0,
+                rotate: clash ? 0 : -45,
+                opacity: clash ? 1 : 0,
+              }}
+              transition={{ duration: 0.4, type: "spring" }}
+              className="text-5xl md:text-8xl font-black z-10 text-amber-500 italic drop-shadow-[0_0_30px_rgba(245,166,35,0.4)]"
+            >
+              VS
+            </motion.div>
           </div>
-        </motion.div>
-      )}
+        )}
 
-      {/* FOOTER */}
-      <div className="text-center mt-10">
-        <p className="text-xl md:text-2xl font-semibold mt-1 text-black">
-          Anyone can deliver a project.
-        </p>
-        <p className="text-gray-500 text-lg md:text-xl mt-2">
-          We deliver systems that actually work.
-        </p>
+        {/* TABLE (Premium UI) */}
+        {showTable && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98, y: 40 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-5xl mx-auto border border-[var(--border)] rounded-[3rem] md:rounded-[4rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden bg-[var(--card)]"
+          >
+            <div className="grid grid-cols-2 bg-[var(--text)] text-[var(--bg)] p-6 md:p-10 md:px-14">
+              <div className="text-[var(--bg)] opacity-40 text-[10px] md:text-xs font-black tracking-[0.3em] uppercase font-mono">
+                THE OTHERS
+              </div>
+              <div className="text-[var(--bg)] text-right text-[10px] md:text-xs font-black tracking-[0.3em] uppercase font-mono flex items-center justify-end gap-4">
+                <span className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(245,166,35,0.8)]" />
+                HOMIES STUDIO
+              </div>
+            </div>
+
+            <div className="p-8 md:p-16 space-y-0 divide-y divide-[var(--border)]">
+              {points.map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -15 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.08 }}
+                  className="grid grid-cols-2 items-center py-8 group transition-all"
+                >
+                  <div className="flex items-center gap-3 md:gap-5 text-[var(--text-faint)] group-hover:text-[var(--text-muted)] transition-colors pr-6">
+                    <X size={18} className="text-red-500/30 shrink-0" />
+                    <span className="text-sm md:text-2xl font-light leading-tight tracking-tight">{item.others}</span>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 md:gap-6 text-[var(--text)]">
+                    <span className="text-sm md:text-2xl text-right font-black leading-tight tracking-tight">{item.ours}</span>
+                    <div className="w-6 h-6 md:w-8 md:h-8 rounded-full border border-amber-500/20 flex items-center justify-center bg-amber-500/5 transition-all group-hover:bg-amber-500 group-hover:text-black">
+                      <Check size={18} className="text-amber-500 group-hover:text-black transition-colors" />
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* HIGHLIGHTED FOOTER FOOTER */}
+        <div className="text-center mt-32 md:mt-44 relative group">
+          <div className="absolute inset-0 bg-amber-500/5 blur-[120px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <motion.p 
+            initial={{ opacity: 0.1, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1 }}
+            className="text-[clamp(18px,4vw,48px)] font-black uppercase tracking-tighter text-[var(--text)] leading-none italic relative z-10 selection:bg-amber-500 selection:text-black"
+          >
+            Don't <span className="text-amber-500 drop-shadow-[0_0_35px_rgba(245,166,35,0.3)] transition-all duration-500 hover:drop-shadow-[0_0_50px_rgba(245,166,35,0.6)]">Settle</span> <br className="md:hidden" /> For Less.
+          </motion.p>
+          <div className="mt-8 flex justify-center opacity-40 group-hover:opacity-100 transition-opacity duration-500">
+             <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
+          </div>
+        </div>
       </div>
     </motion.section>
   );

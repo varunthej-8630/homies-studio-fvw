@@ -1,91 +1,68 @@
 import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
 
 const CustomCursor: React.FC = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const cursor = cursorRef.current;
-    
     if (!cursor) return;
 
-    const xTo = gsap.quickTo(cursor, "x", { duration: 0.15, ease: "power3" });
-    const yTo = gsap.quickTo(cursor, "y", { duration: 0.15, ease: "power3" });
-
-    const handleMouseMove = (e: MouseEvent) => {
-      xTo(e.clientX);
-      yTo(e.clientY);
+    const move = (e: MouseEvent) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
     };
 
-    const handleMouseEnter = () => {
-      gsap.to(cursor, { scale: 1, opacity: 1, duration: 0.3 });
+    const grow = () => {
+      cursor.style.width = '60px';
+      cursor.style.height = '60px';
     };
 
-    const handleMouseLeave = () => {
-      gsap.to(cursor, { scale: 0, opacity: 0, duration: 0.3 });
+    const shrink = () => {
+      cursor.style.width = '20px';
+      cursor.style.height = '20px';
     };
 
-    // Hover effect on interactive elements
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === 'BUTTON' || 
-        target.tagName === 'A' || 
-        target.closest('.interactive') ||
-        target.closest('button') ||
-        target.closest('a')
-      ) {
-        gsap.to(cursor, {
-          width: 40,
-          height: 40,
-          backgroundColor: 'transparent',
-          border: '1px solid #0A0A0A',
-          mixBlendMode: 'difference',
-          duration: 0.3
-        });
-      }
+    window.addEventListener('mousemove', move);
+
+    // Initial setup for existing elements
+    const updateListeners = () => {
+      document.querySelectorAll('a, button, [data-cursor]').forEach(el => {
+        el.addEventListener('mouseenter', grow);
+        el.addEventListener('mouseleave', shrink);
+      });
     };
 
-    const handleMouseOut = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === 'BUTTON' || 
-        target.tagName === 'A' || 
-        target.closest('.interactive') ||
-        target.closest('button') ||
-        target.closest('a')
-      ) {
-        gsap.to(cursor, {
-          width: 8,
-          height: 8,
-          backgroundColor: '#0A0A0A',
-          border: 'none',
-          mixBlendMode: 'normal',
-          duration: 0.3
-        });
-      }
-    };
+    updateListeners();
 
-    window.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseover', handleMouseOver);
-    document.addEventListener('mouseout', handleMouseOut);
-    document.addEventListener('mouseenter', handleMouseEnter);
-    document.addEventListener('mouseleave', handleMouseLeave);
+    // DOM observer for dynamically added elements (like modals)
+    const observer = new MutationObserver(updateListeners);
+    observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseover', handleMouseOver);
-      document.removeEventListener('mouseout', handleMouseOut);
-      document.removeEventListener('mouseenter', handleMouseEnter);
-      document.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('mousemove', move);
+      observer.disconnect();
     };
   }, []);
 
   return (
     <div
+      id="custom-cursor"
       ref={cursorRef}
-      className="fixed top-0 left-0 w-2 h-2 bg-[#0A0A0A] rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 hidden lg:block"
-      style={{ opacity: 0 }}
+      style={{
+        position: 'fixed',
+        width: '20px',
+        height: '20px',
+        borderRadius: '50%',
+        backgroundColor: 'white',
+        mixBlendMode: 'difference',
+        pointerEvents: 'none',
+        zIndex: 99999,
+        transform: 'translate(-50%, -50%)',
+        transition: 'transform 0.1s ease, width 0.2s ease, height 0.2s ease',
+        left: '-100px',
+        top: '-100px'
+      }}
+      className="hidden lg:block"
     />
   );
 };

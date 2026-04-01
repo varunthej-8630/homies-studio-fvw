@@ -10,20 +10,17 @@ import {
 gsap.registerPlugin(ScrollTrigger);
 
 const stats = [
-  { value: 45, label: "Projects Delivered" },
-  { value: 20, label: "Happy Clients" },
-  { value: 12, label: "Tech Domains" },
-  { value: 4, label: "Core Team" },
+  { value: 333, label: "Systems Engineered" },
+  { value: 50, label: "Happy Clients" },
+  { value: 12, label: "Core Tech Domains" },
+  { value: 4, label: "Years of Obsession" },
 ];
-
-// ================= UPDATED STAT CARD =================
 
 const StatCounter = ({ value, label }: any) => {
   const numberRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const obj = { val: 0 };
-
     gsap.fromTo(
       numberRef.current,
       { opacity: 0, scale: 0.8 },
@@ -40,7 +37,7 @@ const StatCounter = ({ value, label }: any) => {
 
     gsap.to(obj, {
       val: value,
-      duration: 1.5,
+      duration: 2,
       ease: "power3.out",
       scrollTrigger: {
         trigger: numberRef.current,
@@ -55,147 +52,86 @@ const StatCounter = ({ value, label }: any) => {
   }, [value]);
 
   return (
-    <div
-      className="group perspective"
-      onMouseMove={(e) => {
-        const el = e.currentTarget;
-        const rect = el.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        const rotateX = ((y / rect.height) - 0.5) * 8;
-        const rotateY = ((x / rect.width) - 0.5) * -8;
-
-        el.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "rotateX(0deg) rotateY(0deg)";
-      }}
-    >
-      <div className="
-        bg-white rounded-2xl p-8 
-        border border-gray-200 
-        shadow-lg 
-        transition-all duration-500 
-        transform-gpu
-        group-hover:scale-105 
-        group-hover:-translate-y-2 
-        group-hover:shadow-2xl
-      ">
-
-        {/* NUMBER */}
-        <div className="text-5xl md:text-6xl font-bold text-black tracking-tight">
+    <div className="group relative">
+      <div className="bg-[var(--card)] rounded-2xl p-8 border border-[var(--border)] hover:border-[var(--border-hover)] transition-all duration-500 hover:-translate-y-2">
+        <div className="text-4xl md:text-5xl font-black text-[var(--text)] tracking-tighter">
           <span ref={numberRef}>0</span>+
         </div>
-
-        {/* LABEL */}
-        <div className="text-xs tracking-widest text-gray-400 uppercase mt-3">
+        <div className="text-[9px] tracking-[0.2em] text-[var(--text-faint)] uppercase mt-3 font-mono">
           {label}
         </div>
-
       </div>
     </div>
   );
 };
 
-// ================= MAIN =================
-
 const About = () => {
-  const floatingCardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    gsap.to(floatingCardRef.current, {
-      y: "-10%",
-      scrollTrigger: {
-        trigger: "#about",
-        start: "top bottom",
-        end: "bottom top",
-        scrub: true,
-      },
-    });
-  }, []);
-
-  const handleMouseMove = (e: any) => {
-    const card = floatingCardRef.current;
-    if (!card) return;
-
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const rotateX = ((y / rect.height) - 0.5) * 8;
-    const rotateY = ((x / rect.width) - 0.5) * -8;
-
-    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-  };
-
-  const resetTilt = () => {
-    if (floatingCardRef.current) {
-      floatingCardRef.current.style.transform = "rotateX(0) rotateY(0)";
-    }
-  };
-
   return (
-    <section id="about" className="py-24 bg-white px-6 md:px-12">
-      <div className="max-w-[1600px] mx-auto">
+    <section id="about" className="py-24 md:py-32 bg-[var(--bg)] text-[var(--text)] px-6 md:px-12 transition-colors duration-500 relative overflow-hidden">
+      <div className="noise-overlay opacity-[0.02]" />
 
-        <p className="text-gray-400 text-xs tracking-widest uppercase mb-4">
-          05 / About
+      <div className="max-w-[1440px] mx-auto relative z-10">
+
+        <p className="text-[var(--text-faint)] text-[9px] md:text-xs tracking-[0.4em] uppercase mb-10 font-mono italic">
+          05 / About Homies
         </p>
 
-        <div className="max-w-3xl">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr,0.8fr] gap-12 lg:gap-24">
+          <div className="max-w-4xl">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="text-[clamp(32px,6vw,86px)] font-display font-black leading-[0.9] mb-12 tracking-tighter uppercase"
+            >
+              Built For People <br /> Who Refuse To <br /> Compromise.
+            </motion.h2>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-8"
-          >
-            Built For Those Who Refuse To Compromise.
-          </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="text-[var(--text-muted)] text-lg md:text-3xl italic mb-12 font-light leading-relaxed pr-6"
+            >
+              We focus on what actually works — not just what looks good. We are builders, engineers, and obsessed craftsmen.
+            </motion.p>
 
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="text-gray-500 text-lg md:text-xl italic mb-6"
-          >
-            We focus on what actually works — not just what looks good.
-          </motion.p>
-
-          <div className="space-y-2 text-sm md:text-base font-medium text-gray-700 leading-relaxed">
-            <p>Homies Studio builds real-world solutions.</p>
-            <p>No fake demos. No shortcuts.</p>
-            <p>If it doesn’t work in real life, we don’t build it.</p>
+            <div className="space-y-6 text-base md:text-lg font-light text-[var(--text-muted)] leading-relaxed max-w-2xl">
+              <p className="border-l-4 border-amber-500 pl-8">Homies Studio builds real-world solutions that survive the production environment.</p>
+              <p className="border-l-4 border-amber-500 pl-8 text-[var(--text)] font-bold uppercase tracking-tight">No fake demos. No shortcuts. No fluff.</p>
+              <p className="border-l-4 border-amber-500 pl-8">If it doesn’t work in real life, it doesn't leave the Homies Lab.</p>
+            </div>
           </div>
 
+          <div className="relative mt-12 lg:mt-0 flex flex-col h-full">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className="bg-[var(--card)] border border-[var(--border)] rounded-[2.5rem] md:rounded-[3rem] p-10 md:p-14 shadow-2xl relative overflow-hidden h-full flex flex-col justify-center text-center group"
+            >
+              {/* DECORATIVE BACKGROUND GLOW */}
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/20 transition-all duration-700" />
+
+              <div className="grid grid-cols-4 gap-6 text-[var(--text)] opacity-60 mb-10 justify-items-center group-hover:opacity-100 transition-opacity">
+                <Zap size={24} /> <Brain size={24} /> <Cpu size={24} /> <Bot size={24} />
+                <Code2 size={24} /> <Radio size={24} /> <CircuitBoard size={24} /> <BarChart2 size={24} />
+              </div>
+              <h4 className="text-2xl md:text-4xl font-display font-black uppercase mb-4 tracking-tighter text-[var(--text)]">The Lab.</h4>
+              <p className="text-[var(--text-muted)] text-sm md:text-base leading-relaxed font-light">
+                Serve the INDIA. <br />
+                Our engineering lab is where hardware meets intelligence.
+              </p>
+              <div className="mt-10 font-mono text-[9px] tracking-[0.4em] uppercase text-amber-500 font-bold">
+                 // IN LAB EST. 2026
+              </div>
+            </motion.div>
+          </div>
         </div>
 
-        {/* UPDATED STATS GRID */}
-        <div className="mt-14 relative">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {/* STATS GRID */}
+        <div className="mt-24">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {stats.map((stat) => (
               <StatCounter key={stat.label} {...stat} />
             ))}
           </div>
-
-          {/* FLOATING CARD (UNCHANGED) */}
-          <motion.div
-            ref={floatingCardRef}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={resetTilt}
-            initial={{ opacity: 0, y: 40}}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="absolute -top-50 right-0 w-60 p-10 bg-white border border-gray-500 rounded-xl shadow-md hidden md:block"
-          >
-            <div className="grid grid-cols-4 gap-2 text-gray-300">
-              <Zap size={18} /> <Brain size={18} /> <Cpu size={18} /> <Bot size={18} />
-              <Code2 size={18} /> <Radio size={18} /> <CircuitBoard size={18} /> <BarChart2 size={18} />
-            </div>
-
-            <p className="mt-3 text-[12px] tracking-widest uppercase text-gray-400 text-center">
-              Tech Stack Focused
-            </p>
-          </motion.div>
-
         </div>
 
       </div>
