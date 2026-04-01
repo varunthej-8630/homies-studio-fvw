@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono&family=Playfair+Display:ital@1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono&family=Playfair+Display:ital@1&family=Prata&family=Rubik+80s+Fade&family=Syncopate:wght@400;700&family=Outfit:wght@100;300;400;700;900&family=Bebas+Neue&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -15,10 +15,10 @@
   --accent: #FFFFFF;
   --floating-icon: rgba(255,255,255,0.13);
   
-  --font-display: 'Syne', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-accent: 'Playfair Display', serif;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Outfit', sans-serif;
+  --font-mono: 'Rubik 80s Fade', cursive;
+  --font-accent: 'Syne', sans-serif;
 }
 
 html.light {
