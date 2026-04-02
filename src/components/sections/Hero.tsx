@@ -59,6 +59,7 @@ const Hero = () => {
 
   return (
     <section
+      id="hero"
       ref={containerRef}
       className={`min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center justify-center text-center px-4 sm:px-6 md:pl-28 overflow-hidden relative transition-colors duration-500 ${!isMobile ? 'cursor-none' : 'cursor-auto'}`}
     >
@@ -178,7 +179,7 @@ const Hero = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="relative z-10 text-[clamp(60px,18vw,240px)] font-black leading-none text-white uppercase font-['Inter'] tracking-[-0.05em] drop-shadow-[5px_5px_0px_#333] md:drop-shadow-[15px_15px_0px_#333]"
+                className="relative z-10 text-[clamp(50px,18vw,240px)] font-black leading-none text-white uppercase font-['Inter'] tracking-[-0.05em] drop-shadow-[5px_5px_0px_#333] md:drop-shadow-[15px_15px_0px_#333]"
               >
                 H<span className="text-amber-400 font-extralight drop-shadow-[0_0_20px_rgba(251,191,36,0.7)]">𝕆𝕄</span>IES
               </motion.h1>
@@ -253,7 +254,7 @@ const Hero = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed z-[10000] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-xl bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] p-8 sm:p-12 shadow-2xl flex flex-col items-center max-h-[90vh] overflow-y-auto"
+              className="fixed z-[10000] top-1/2 left-1/2 -track-x-1/2 -track-y-1/2 translate-x-[-50%] translate-y-[-50%] w-full sm:w-[92%] max-w-xl h-full sm:h-auto bg-[#0A0A0A] border border-white/10 sm:rounded-[2.5rem] rounded-none p-6 sm:p-12 shadow-2xl flex flex-col items-center max-h-full sm:max-h-[90vh] overflow-y-auto"
             >
               <button
                 onClick={() => setOpenCallModal(false)}

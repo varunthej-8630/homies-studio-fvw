@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 
 const navItems = [
+  { name: 'Return Home', href: 'hero' },
   { name: 'What Homies Do', href: 'services' },
   { name: 'Homies Process', href: 'process' },
   { name: 'Homies Works', href: 'work' },
@@ -42,51 +43,54 @@ const MobileMenu = () => {
       {/* BURGER BUTTON */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed top-6 right-6 z-[60] p-3 bg-white/20 backdrop-blur-xl border border-white/30 rounded-full shadow-lg text-black"
+        className="fixed top-6 right-6 z-[60] p-4 bg-[var(--surface)] backdrop-blur-3xl border border-white/10 rounded-full shadow-2xl text-[var(--text)] active:scale-90 transition-all"
         aria-label="Open Menu"
       >
-        <Menu size={24} />
+        <Menu size={20} />
       </button>
 
       {/* OVERLAY */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[70] bg-white flex flex-col items-center justify-center p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[70] bg-[var(--bg)]/95 backdrop-blur-3xl flex flex-col items-center justify-center p-8 overflow-hidden"
           >
+            {/* DECOR */}
+            <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] bg-white/5 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[300px] h-[300px] bg-white/5 rounded-full blur-[100px] pointer-events-none" />
+
             {/* CLOSE BUTTON */}
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-6 right-6 p-3 bg-black/5 rounded-full text-black"
+              className="absolute top-6 right-6 p-4 text-[var(--text)]/40 hover:text-[var(--text)] transition-colors active:scale-90"
               aria-label="Close Menu"
             >
-              <X size={24} />
+              <X size={28} strokeWidth={3} />
             </button>
 
             {/* NAV LINKS */}
-            <nav className="flex flex-col items-center gap-8">
+            <nav className="flex flex-col items-center gap-6 sm:gap-8 w-full">
+              <p className="font-mono text-[10px] tracking-[0.5em] text-[var(--text-muted)] uppercase mb-4">// NAVIGATION</p>
               {navItems.map((item, i) => (
                 <motion.button
                   key={item.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  transition={{ delay: i * 0.05, duration: 0.5 }}
                   onClick={() => scrollToSection(item.href)}
-                  className="text-3xl font-display font-bold text-black active:text-gray-500"
+                  className="text-4xl sm:text-5xl font-display font-black text-[var(--text)] uppercase tracking-tighter hover:italic hover:tracking-normal transition-all"
                 >
-                  {item.name}
+                  {item.name.replace('Homies ', '')}
                 </motion.button>
               ))}
             </nav>
 
             {/* FOOTER INFO */}
-            <div className="absolute bottom-12 text-center text-gray-400 text-sm">
-              <p>© 2026 Homies Studio</p>
-              <p className="mt-2 font-mono">Real Systems. Real People.</p>
+            <div className="absolute bottom-12 text-center text-[var(--text-muted)] text-[10px] font-mono tracking-widest uppercase">
+              <p>© 2026 HOMIES STUDIO // PROTOCOL V1</p>
             </div>
           </motion.div>
         )}

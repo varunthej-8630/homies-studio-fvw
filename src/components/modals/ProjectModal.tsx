@@ -55,6 +55,7 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
     tech: '',
     deadline: '',
     budget: '',
+    driveLink: '',
     contactMethod: 'WhatsApp',
   });
   const [file, setFile] = useState<File | null>(null);
@@ -97,12 +98,12 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
     setSubmitError(null);
     
     try {
-      const msg = `Hello Homies Studio Team,\nMy name is ${form.name}.\n\nI am interested in starting a project.\n\nProject: ${form.projectTitle}\nType: ${form.projectType}\nGoal: ${form.description}\nFeatures: ${form.features}\nDeadline: ${form.deadline}\nBudget: ${form.budget}\n\nPreferred Contact: ${form.contactMethod}\n${file ? `Included Reference: ${file.name} (I'll attach it below this message manually)` : ''}\n\nThank you.`;
+      const msg = `Hello Homies Studio Team,\nMy name is ${form.name}.\n\nI am interested in starting a project.\n\nProject: ${form.projectTitle}\nType: ${form.projectType}\nGoal: ${form.description}\nFeatures: ${form.features}\nDeadline: ${form.deadline}\nBudget: ${form.budget}\nDrive Link: ${form.driveLink || 'None'}\n\nPreferred Contact: ${form.contactMethod}\n${file ? `Included Reference: ${file.name} (I'll attach it manually)` : ''}\n\nThank you.`;
       
-      // EMAIL JS SEND WITH FULL PAYLOAD (Removed large attachments to avoid 413 error)
+      // EMAIL JS SEND
       const emailPromise = emailjs.send(
-        "service_wk9xnio",
-        "template_f9tlf8l",
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
         {
           from_name: form.name,
           from_email: form.email,
@@ -114,10 +115,11 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
           features: form.features,
           deadline: form.deadline,
           budget: form.budget,
+          drive_link: form.driveLink || 'None',
           file_name: file ? file.name : 'No file',
           to_email: 'info.homiesstudio@gmail.com'
         },
-        "Ni-K4p5KCay07Ma_S"
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       );
 
       // Timeout after 8 seconds
@@ -125,13 +127,12 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
       
       try {
         await Promise.race([emailPromise, timeoutPromise]);
-        // Successfully sent
       } catch (e: any) {
         console.warn("Mail uplink delayed or failed", e);
-        alert(`Transmission Warning:\nStatus: ${e.status}\nText: ${e.text}`);
+        setSubmitError("Email protocol slow. Proceeding to WhatsApp...");
       }
 
-      if (form.contactMethod === 'WhatsApp') {
+      if (form.contactMethod === 'WhatsApp' || !!submitError) {
         const waUrl = `https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
         window.open(waUrl, '_blank');
       }
@@ -139,8 +140,7 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
       setShowSuccess(true);
     } catch (err) {
       console.error(err);
-      setSubmitError("Uplink unstable. Please use WhatsApp if possible.");
-      if (err) alert("Transmission Error: " + JSON.stringify(err));
+      setSubmitError("Submission protocol failed. Please use WhatsApp.");
     } finally {
       setIsSubmitting(false);
     }
@@ -168,7 +168,7 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="w-full max-w-2xl bg-[#080808] border border-white/10 rounded-[2.5rem] p-8 md:p-12 relative shadow-[0_0_50px_rgba(255,255,255,0.05)] overflow-hidden transition-colors"
+            className="w-full max-w-2xl bg-[#080808] border border-white/10 sm:rounded-[2.5rem] rounded-none p-6 sm:p-12 relative shadow-[0_0_50px_rgba(255,255,255,0.05)] overflow-hidden transition-colors h-full sm:h-auto sm:max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* GLOW DECOR */}
@@ -205,9 +205,9 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
               </motion.div>
             ) : (
               <>
-                <div className="mb-12">
-                  <p className="text-[10px] tracking-[0.5em] uppercase text-white/20 mb-3 font-mono">// START A PROJECT</p>
-                  <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-8">Initiate System.</h2>
+                <div className="mb-8 sm:mb-12">
+                  <p className="text-[9px] sm:text-[10px] tracking-[0.4em] sm:tracking-[0.5em] uppercase text-white/20 mb-3 font-mono">// START A PROJECT</p>
+                  <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter leading-none mb-6 sm:mb-8">Initiate System.</h2>
                   
                   {/* PROGRESS INDICATOR */}
                   <div className="flex items-center gap-1">
@@ -374,16 +374,16 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
                         </div>
 
                         <div className="space-y-4">
-                          <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1 flex items-center gap-2">
-                             <DollarSign size={12} /> Resource Allocation (Budget) *
+                          <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/40 ml-1 flex items-center gap-2 leading-none">
+                             <DollarSign size={12} /> Budget Range *
                           </label>
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-2 gap-3 sm:gap-4">
                             {budgetRanges.map((range) => (
                               <button
                                 key={range.value}
                                 type="button"
                                 onClick={() => setForm({ ...form, budget: range.value })}
-                                className={`p-5 rounded-2xl border text-center transition-all duration-300 ${form.budget === range.value ? 'bg-white border-white text-black' : 'bg-white/5 border-white/10 text-white/40 hover:border-white/30'}`}
+                                className={`p-4 sm:p-5 rounded-xl sm:rounded-2xl border text-center transition-all duration-300 ${form.budget === range.value ? 'bg-white border-white text-black' : 'bg-white/5 border-white/10 text-white/40 hover:border-white/30'}`}
                               >
                                 <span className="text-[10px] font-black uppercase tracking-widest">{range.label}</span>
                               </button>
@@ -424,10 +424,22 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
                         </div>
 
                         <div className="space-y-4">
-                          <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1 flex items-center gap-2">
-                             <Settings size={12} /> Preferred Contact Protocol
+                          <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1 flex items-center gap-2">
+                             <FileText size={12} /> Secondary Resource / Drive Link
                           </label>
-                          <div className="flex gap-3">
+                          <input 
+                            placeholder="LINK TO DOCS / GOOGLE DRIVE" 
+                            className="w-full bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl px-6 py-4 outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/20 focus:border-white/30 transition-all"
+                            value={form.driveLink}
+                            onChange={e => setForm({ ...form, driveLink: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="space-y-4">
+                          <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1 flex items-center gap-2">
+                             <Settings size={12} /> Contact Protocol
+                          </label>
+                          <div className="grid grid-cols-3 gap-2 sm:gap-3">
                             {[
                               { id: 'WhatsApp', icon: MessageSquare },
                               { id: 'Email', icon: Mail },
@@ -437,10 +449,10 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
                                 key={method.id}
                                 type="button"
                                 onClick={() => setForm({ ...form, contactMethod: method.id })}
-                                className={`flex-1 flex flex-col items-center gap-3 p-5 rounded-2xl border transition-all duration-300 ${form.contactMethod === method.id ? 'bg-white border-white text-black' : 'bg-white/5 border-white/10 text-white/40 hover:border-white/30'}`}
+                                className={`flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-5 rounded-xl sm:rounded-2xl border transition-all duration-300 ${form.contactMethod === method.id ? 'bg-white border-white text-black' : 'bg-white/5 border-white/10 text-white/40 hover:border-white/30'}`}
                               >
-                                <method.icon size={18} />
-                                <span className="text-[9px] font-black uppercase tracking-widest">{method.id}</span>
+                                <method.icon size={16} />
+                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest leading-none">{method.id}</span>
                               </button>
                             ))}
                           </div>
@@ -464,20 +476,20 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
                       <button
                         type="button"
                         onClick={nextStep}
-                        className="flex-1 py-5 bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+                        className="flex-1 py-4 sm:py-5 bg-white text-black font-black text-[9px] sm:text-[10px] tracking-[0.3em] sm:tracking-[0.4em] uppercase rounded-xl sm:rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
                       >
-                        Proceed to Next Phase <ChevronRight size={14} />
+                        Next Phase <ChevronRight size={14} />
                       </button>
                     ) : (
                       <div className="flex-1 flex flex-col gap-2">
-                         {submitError && <p className="text-[9px] text-red-500 font-bold uppercase text-center mb-1">{submitError}</p>}
+                         {submitError && <p className="text-[8px] text-red-500 font-bold uppercase text-center mb-1">{submitError}</p>}
                          <button
                            type="button"
                            onClick={handleSubmit}
                            disabled={isSubmitting}
-                           className={`w-full py-5 bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase rounded-2xl transition-all flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-50 pointer-events-none' : 'hover:scale-[1.02] active:scale-95 shadow-[0_10px_40px_rgba(255,255,255,0.1)]'}`}
+                           className={`w-full py-4 sm:py-5 bg-white text-black font-black text-[9px] sm:text-[10px] tracking-[0.3em] sm:tracking-[0.4em] uppercase rounded-xl sm:rounded-2xl transition-all flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-50 pointer-events-none' : 'hover:scale-[1.02] active:scale-95 shadow-[0_10px_40px_rgba(255,255,255,0.1)]'}`}
                          >
-                           {isSubmitting ? 'ESTABLISHING CONNECTION...' : 'Start My Project →'}
+                           {isSubmitting ? 'ESTABLISHING...' : 'Start Project →'}
                          </button>
                       </div>
                     )}

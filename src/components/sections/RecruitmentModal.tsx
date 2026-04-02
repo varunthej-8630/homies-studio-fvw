@@ -38,6 +38,7 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose }) => {
     hasProjects: 'No',
     projectDetails: '',
     portfolio: '',
+    resumeLink: '',
     motivation: '',
     whatMakesDifferent: '',
     availability: '',
@@ -65,7 +66,7 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose }) => {
     if (!form.name) newErrors.name = 'Protocol name required';
     if (!form.email || !/^\S+@\S+\.\S+$/.test(form.email)) newErrors.email = 'Secure email required';
     if (!form.phone) newErrors.phone = 'Uplink frequency required';
-    if (!form.motivation) newErrors.motivation = 'Your drive is needed';
+    if (!form.resumeLink && !form.portfolio) newErrors.resumeLink = 'Resume protocol/link required';
     if (form.interests.length === 0) newErrors.interests = 'Select at least one sector';
     
     setErrors(newErrors);
@@ -81,26 +82,24 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose }) => {
     try {
       const msg = `Hello Homies Studio Team,\nMy name is ${form.name}.\n\nI want to Join the Homies!\n\nBackground: ${form.status} at ${form.organization} ${form.year ? `(Year ${form.year})` : ''}\nInterests: ${form.interests.join(', ')}\nMotivation: ${form.motivation}\nAvailability: ${form.availability}\n${resume ? `Resume Ready: ${resume.name} (I'll attach it manually below)` : ''}\n\nThank you.`;
 
-
-      // EMAIL JS SEND WITH FULL PAYLOAD (Removed large attachment to avoid 413 error)
+      // EMAIL JS SEND
       const emailPromise = emailjs.send(
-        "service_wk9xnio",
-        "template_f9tlf8l",
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
         {
-          from_name: form.name,
-          from_email: form.email,
+          name: form.name,
+          email: form.email,
           phone: form.phone,
-          message: msg,
-          status: form.status,
-          organization: form.organization,
-          interests: form.interests.join(', '),
+          location: form.location || 'Not Specified',
+          interest: form.interests.join(', '),
+          experience: `${form.status} at ${form.organization} ${form.year ? ` - Year ${form.year}` : ''}`,
+          skills: `${form.skills}\nTools: ${form.tools}`,
+          projects: form.hasProjects === 'Yes' ? form.projectDetails : 'None',
           motivation: form.motivation,
-          resume_name: resume ? resume.name : 'No resume',
-          project_type: 'RECRUITMENT',
-          project_title: 'HOMIES ENLISTMENT',
+          resume: form.resumeLink || form.portfolio || 'No Link Provided',
           to_email: 'info.homiesstudio@gmail.com'
         },
-        "Ni-K4p5KCay07Ma_S"
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       );
 
       // Timeout after 8 seconds
@@ -110,7 +109,7 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose }) => {
         await Promise.race([emailPromise, timeoutPromise]);
       } catch (e: any) {
         console.warn("Mail delayed or failed, proceeding to WhatsApp", e);
-        alert(`Uplink Warning:\nStatus: ${e.status}\nText: ${e.text}`);
+        setSubmitError("Email protocol slow. Proceeding to WhatsApp...");
       }
 
       // REDIRECT TO WHATSAPP AS WELL FOR FAST COMMS
@@ -120,7 +119,7 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose }) => {
       setShowSuccess(true);
     } catch (err) {
       console.error("Critical submission error:", err);
-      setSubmitError("Uplink failed. Please try WhatsApp directly.");
+      setSubmitError("Submission failed. Please use WhatsApp.");
     } finally {
       setIsSubmitting(false);
     }
@@ -147,7 +146,7 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose }) => {
             initial={{ scale: 0.9, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 30 }}
-            className="w-full max-w-2xl bg-[#080808] border border-white/10 rounded-[2.5rem] p-8 md:p-12 relative shadow-[0_0_50px_rgba(255,255,255,0.05)] overflow-y-auto max-h-[90vh] custom-scrollbar"
+            className="w-full max-w-2xl bg-[#080808] border border-white/10 sm:rounded-[2.5rem] rounded-none p-6 sm:p-12 relative shadow-[0_0_50px_rgba(255,255,255,0.05)] overflow-y-auto h-full sm:h-auto sm:max-h-[90vh] custom-scrollbar"
             onClick={(e) => e.stopPropagation()}
           >
             {/* CLOSE */}
@@ -333,23 +332,23 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* EXPERIENCE */}
-                <div className="space-y-8">
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50 flex items-center gap-4">
-                    <span className="w-8 h-px bg-white/20"></span> 04 / Experience
+                <div className="space-y-6 sm:space-y-8">
+                  <h3 className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.4em] text-white/50 flex items-center gap-3 sm:gap-4 leading-none">
+                    <span className="w-6 sm:w-8 h-px bg-white/20"></span> 04 / Experience
                   </h3>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl gap-4">
                       <div className="flex items-center gap-3">
                         <Zap size={14} className="text-white/20" />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-white/40">Have you built any projects?</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-white/40">Any built projects?</span>
                       </div>
-                      <div className="flex gap-4">
+                      <div className="flex gap-2 sm:gap-4">
                         {['Yes', 'No'].map(opt => (
                           <button
                             key={opt}
                             type="button"
                             onClick={() => setForm({ ...form, hasProjects: opt })}
-                            className={`px-6 py-2 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${form.hasProjects === opt ? 'bg-white border-white text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'bg-white/5 border-white/10 text-white/30'}`}
+                            className={`flex-1 sm:flex-none px-6 py-2 sm:py-2.5 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${form.hasProjects === opt ? 'bg-white border-white text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'bg-white/5 border-white/10 text-white/30'}`}
                           >
                             {opt}
                           </button>
@@ -357,7 +356,7 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose }) => {
                       </div>
                     </div>
                     {form.hasProjects === 'Yes' && (
-                      <div className="group relative flex flex-col bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all p-6">
+                      <div className="group relative flex flex-col bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all p-5 sm:p-6">
                         <textarea
                           placeholder="MISSION LOGS (PROJECTS BUILT)..."
                           className="w-full bg-transparent outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/10 resize-none"
@@ -367,7 +366,7 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose }) => {
                         />
                       </div>
                     )}
-                    <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all px-6">
+                    <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all px-5 sm:px-6">
                        <Globe size={14} className="text-white/20 group-focus-within:text-white transition-colors" />
                        <input
                         placeholder="PORTFOLIO / GITHUB / LINKEDIN"
@@ -384,22 +383,35 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50 flex items-center gap-4">
                     <span className="w-8 h-px bg-white/20"></span> 05 / Resume
                   </h3>
-                  <div 
-                    onClick={() => resumeInputRef.current?.click()}
-                    className="border border-dashed border-white/10 rounded-2xl p-12 flex flex-col items-center justify-center gap-4 hover:border-white/30 transition-all cursor-pointer group bg-white/[0.02]"
-                  >
-                     <input 
-                      type="file" 
-                      ref={resumeInputRef} 
-                      className="hidden" 
-                      onChange={(e) => setResume(e.target.files ? e.target.files[0] : null)}
-                      accept="application/pdf"
-                     />
-                     <Upload size={32} className={`transition-all transform ${resume ? 'text-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'text-white/10 group-hover:text-white group-hover:-translate-y-1'}`} />
-                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-white text-center">
-                       {resume ? `RESUME READY: ${resume.name}` : 'Upload CV / Resume (REQUIRED *)'}
-                     </span>
-                     <span className="text-[8px] uppercase text-white/20">{resume ? 'CLICK TO CHANGE' : 'PDF FORMAT ONLY (MAX 5MB)'}</span>
+                  
+                  <div className="space-y-4">
+                    <div className={`group relative flex items-center bg-white/5 border rounded-2xl transition-all px-6 ${errors.resumeLink ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border-white/10 focus-within:border-white/30'}`}>
+                      <Globe size={14} className="text-white/20 group-focus-within:text-white transition-colors" />
+                      <input
+                        placeholder="RESUME DRIVE LINK / PORTFOLIO *"
+                        className="w-full bg-transparent py-4 pl-4 outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/20"
+                        value={form.resumeLink}
+                        onChange={e => setForm({ ...form, resumeLink: e.target.value })}
+                      />
+                      {errors.resumeLink && <p className="absolute -bottom-5 left-1 text-[7px] text-red-500 uppercase font-black tracking-widest">{errors.resumeLink}</p>}
+                    </div>
+                    
+                    <div 
+                      onClick={() => resumeInputRef.current?.click()}
+                      className="border border-dashed border-white/10 rounded-2xl p-12 flex flex-col items-center justify-center gap-4 hover:border-white/30 transition-all cursor-pointer group bg-white/[0.02]"
+                    >
+                       <input 
+                        type="file" 
+                        ref={resumeInputRef} 
+                        className="hidden" 
+                        onChange={(e) => setResume(e.target.files ? e.target.files[0] : null)}
+                        accept="application/pdf"
+                       />
+                       <Upload size={32} className={`transition-all transform ${resume ? 'text-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'text-white/10 group-hover:text-white group-hover:-translate-y-1'}`} />
+                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-white text-center">
+                         {resume ? `RESUME READY: ${resume.name}` : 'Upload CV (Manual Backup)'}
+                       </span>
+                    </div>
                   </div>
                 </div>
 

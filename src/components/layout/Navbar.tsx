@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Wrench,
   Briefcase,
@@ -9,11 +10,13 @@ import {
   Workflow,
   Moon,
   Sun,
-  PhoneCall
+  PhoneCall,
+  Home
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 const navItems = [
+  { name: 'Home', href: 'hero', icon: Home },
   { name: 'Services', href: 'services', icon: Wrench },
   { name: 'Process', href: 'process', icon: Workflow },
   { name: 'Works', href: 'work', icon: Briefcase },
@@ -67,10 +70,20 @@ const Navbar = () => {
               onClick={() => scrollToSection(item.href)}
               className="relative flex items-center justify-center group"
             >
+              <AnimatePresence>
+                {isActive && (
+                  <motion.div
+                    layoutId="navIndicator"
+                    className="absolute inset-0 bg-white rounded-full z-0"
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
+              </AnimatePresence>
+
               <button
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 relative z-10
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 relative z-10
                 ${isActive 
-                  ? 'bg-white text-black' 
+                  ? 'text-black' 
                   : 'text-white/40 hover:text-white hover:bg-white/10'}`}
               >
                 <Icon size={18} />
