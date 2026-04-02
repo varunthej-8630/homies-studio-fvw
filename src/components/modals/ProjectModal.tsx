@@ -133,7 +133,7 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
       }
 
       if (form.contactMethod === 'WhatsApp' || !!submitError) {
-        const waUrl = `https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+        const waUrl = `https://api.whatsapp.com/send?phone=${import.meta.env.VITE_WHATSAPP_NUMBER}&text=${encodeURIComponent(msg)}`;
         window.open(waUrl, '_blank');
       }
       
@@ -168,7 +168,7 @@ const ProjectModal: React.FC<Props> = ({ isOpen, onClose }) => {
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="w-full max-w-2xl bg-[#080808] border border-white/10 sm:rounded-[2.5rem] rounded-none p-6 sm:p-12 relative shadow-[0_0_50px_rgba(255,255,255,0.05)] overflow-hidden transition-colors h-full sm:h-auto sm:max-h-[90vh]"
+            className="w-full max-w-2xl bg-[#080808] border border-white/10 sm:rounded-[2.5rem] rounded-none p-6 sm:p-12 relative shadow-[0_0_50px_rgba(255,255,255,0.05)] overflow-y-auto transition-colors h-full sm:h-auto sm:max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* GLOW DECOR */}

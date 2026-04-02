@@ -179,7 +179,7 @@ const Hero = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="relative z-10 text-[clamp(50px,18vw,240px)] font-black leading-none text-white uppercase font-['Inter'] tracking-[-0.05em] drop-shadow-[5px_5px_0px_#333] md:drop-shadow-[15px_15px_0px_#333]"
+                className="relative z-10 text-[clamp(50px,18vw,240px)] font-black leading-none text-[var(--accent)] uppercase font-['Inter'] tracking-[-0.05em] drop-shadow-[5px_5px_0px_#333] mb-4 md:drop-shadow-[15px_15px_0px_#333] hover:text-amber-400 transition-colors duration-300 group cursor-pointer"
               >
                 H<span className="text-amber-400 font-extralight drop-shadow-[0_0_20px_rgba(251,191,36,0.7)]">𝕆𝕄</span>IES
               </motion.h1>
@@ -188,7 +188,7 @@ const Hero = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-[clamp(40px,10vw,120px)] font-black leading-none text-white mt-[-2vw] font-['Syne'] italic drop-shadow-[4px_4px_0px_#333] md:drop-shadow-[10px_10px_0px_#333]"
+                className="text-[clamp(40px,10vw,120px)] font-black leading-none text-[var(--accent)] mt-[-2vw] font-['Syne'] italic drop-shadow-[4px_4px_0px_#333] md:drop-shadow-[10px_10px_0px_#333] hover:text-amber-400 transition-colors duration-300 cursor-pointer"
               >
                 Studio
               </motion.h1>
