@@ -332,7 +332,7 @@ const Hero = () => {
                     }
 
                     
-                    window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+                    window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
                     setIsSubmittingCall(false);
                     setShowCallSuccess(true);
                   }}
