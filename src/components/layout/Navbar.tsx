@@ -55,7 +55,7 @@ const Navbar = () => {
   return (
     <>
       {/* 🔥 NAV (Desktop Only) */}
-      <nav className="hidden md:flex fixed left-4 top-1/2 -translate-y-1/2 flex-col gap-2 z-[999] bg-[var(--nav-bg)] border border-[var(--border)] rounded-2xl py-4 px-2.5 shadow-xl transition-all duration-300">
+      <nav className="hidden md:flex fixed left-6 top-1/2 -translate-y-1/2 flex-col gap-3 z-[999] bg-[#0A0A0A] border border-white/5 rounded-[2.5rem] py-6 px-3 shadow-2xl transition-all duration-300">
         
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -68,18 +68,18 @@ const Navbar = () => {
               className="relative flex items-center justify-center group"
             >
               <button
-                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 relative z-10
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 relative z-10
                 ${isActive 
-                  ? 'bg-[var(--text)] text-[var(--bg)]' 
-                  : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--border)]'}`}
+                  ? 'bg-white text-black' 
+                  : 'text-white/40 hover:text-white hover:bg-white/10'}`}
               >
-                <Icon size={16} />
+                <Icon size={18} />
               </button>
 
               {/* TOOLTIP */}
               <div
-                className={`absolute left-full ml-3 px-3 py-1.5 text-[10px] uppercase font-bold tracking-widest rounded-md
-                bg-[var(--text)] text-[var(--bg)] whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-200 shadow-xl`}
+                className={`absolute left-full ml-4 px-3 py-1.5 text-[9px] uppercase font-black tracking-widest rounded-md
+                bg-white text-black whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-200 shadow-xl`}
               >
                 {item.name}
               </div>
@@ -87,22 +87,22 @@ const Navbar = () => {
           );
         })}
 
-        <div className="my-2 h-[1px] bg-[var(--border)] w-full" />
+        <div className="my-2 h-[1px] bg-white/5 w-full" />
 
         {/* THEME TOGGLE */}
         <button
           onClick={toggleMode}
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--border)] transition-all duration-200"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all duration-200"
         >
-          {mode === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          {mode === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
-        {/* CALL ACTION */}
+        {/* CALL ACTION (White Pill in Image) */}
         <button
           onClick={() => window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=Hi%20Homies%2C%20I%20want%20to%20book%20a%20call`, '_blank')}
-          className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--text)] text-[var(--bg)] hover:opacity-90 transition-all duration-200"
+          className="w-10 h-12 rounded-2xl md:rounded-[1.25rem] flex items-center justify-center bg-white text-black hover:scale-105 transition-all duration-200 mt-2"
         >
-          <PhoneCall size={16} />
+          <PhoneCall size={20} />
         </button>
       </nav>
     </>

@@ -1,62 +1,6 @@
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
-
-const Particles = ({ active }: { active: boolean }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  
-  useEffect(() => {
-    if (!active) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animationFrameId: number;
-    let w = (canvas.width = window.innerWidth);
-    let h = (canvas.height = window.innerHeight);
-
-    const handleResize = () => {
-      w = (canvas.width = window.innerWidth);
-      h = (canvas.height = window.innerHeight);
-    };
-    window.addEventListener('resize', handleResize);
-
-    const particles = Array.from({ length: 70 }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      size: Math.random() * 1.4 + 0.4,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
-      op: Math.random() * 0.35 + 0.08
-    }));
-
-    const render = () => {
-      ctx.clearRect(0, 0, w, h);
-      particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = w;
-        if (p.x > w) p.x = 0;
-        if (p.y < 0) p.y = h;
-        if (p.y > h) p.y = 0;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,255,255,${p.op})`;
-        ctx.fill();
-      });
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [active]);
-
-  return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-0 opacity-40" />;
-};
 
 const Hero = () => {
   const [stage, setStage] = useState<'intro' | 'main'>('intro');
@@ -77,7 +21,7 @@ const Hero = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setStage('main');
-    }, 6000);
+    }, 3000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -91,90 +35,15 @@ const Hero = () => {
     return () => window.removeEventListener('mousemove', handleMove);
   }, [mouseX, mouseY]);
 
-  const springParallaxX = useSpring(mouseX, { stiffness: 50, damping: 20 });
-  const springParallaxY = useSpring(mouseY, { stiffness: 50, damping: 20 });
-
-  // PARALLAX CALCULATIONS (Smoothed)
-  const winW = typeof window !== 'undefined' ? window.innerWidth : 1000;
-  const winH = typeof window !== 'undefined' ? window.innerHeight : 1000;
-
-  const rotateX = useTransform(springParallaxY, [0, winH], [4, -4]);
-  const rotateY = useTransform(springParallaxX, [0, winW], [-6, 6]);
-  
-  const lx1 = useTransform(springParallaxX, [0, winW], [-15, 15]);
-  const ly1 = useTransform(springParallaxY, [0, winH], [-8, 8]);
-  
-  const lx2 = useTransform(springParallaxX, [0, winW], [-10, 10]);
-  const ly2 = useTransform(springParallaxY, [0, winH], [-5, 5]);
-  
-  const lx3 = useTransform(springParallaxX, [0, winW], [-5, 5]);
-  const ly3 = useTransform(springParallaxY, [0, winH], [-3, 3]);
-
-  const MagneticButton = ({ children, onClick, className }: any) => {
-    const mbX = useMotionValue(0);
-    const mbY = useMotionValue(0);
-    const springMagnX = useSpring(mbX, { stiffness: 200, damping: 20 });
-    const springMagnY = useSpring(mbY, { stiffness: 200, damping: 20 });
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-      const { clientX, clientY, currentTarget } = e;
-      const { left, top, width, height } = currentTarget.getBoundingClientRect();
-      const x = clientX - (left + width / 2);
-      const y = clientY - (top + height / 2);
-      mbX.set(x * 0.25);
-      mbY.set(y * 0.25);
-    };
-
-    const handleMouseLeave = () => {
-      mbX.set(0);
-      mbY.set(0);
-    };
-
-    return (
-      <motion.button
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        onClick={onClick}
-        style={{ x: springMagnX, y: springMagnY }}
-        className={`${className} transition-colors duration-200`}
-      >
-        {children}
-      </motion.button>
-    );
-  };
-
-  const LetterAnimation = ({ text, delayOffset = 0 }: { text: string, delayOffset?: number }) => {
-    const characters = Array.from(text);
-    return (
-      <div className="flex flex-wrap justify-center">
-        {characters.map((char, i) => (
-          <motion.span
-            key={i}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: (i * 0.08) + delayOffset,
-              duration: 0.3,
-              ease: "easeOut"
-            }}
-            style={{ marginRight: char === ' ' ? '1ch' : '0' }}
-          >
-            {char}
-          </motion.span>
-        ))}
-      </div>
-    );
-  };
-
   return (
-    <section 
+    <section
       ref={containerRef}
-      className={`min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center justify-center text-center px-4 sm:px-6 overflow-hidden relative transition-colors duration-500 ${!isMobile ? 'cursor-none' : 'cursor-auto'}`}
+      className={`min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center justify-center text-center px-4 sm:px-6 md:pl-28 overflow-hidden relative transition-colors duration-500 ${!isMobile ? 'cursor-none' : 'cursor-auto'}`}
     >
       {/* 1. PREMIUM BACKGROUND: RADIAL GRADIENT + VIGNETTE */}
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,var(--surface)_0%,var(--bg)_100%)] transition-colors duration-500" />
       <div className="absolute inset-0 z-0 bg-[var(--bg)]/40 backdrop-blur-[1px] pointer-events-none transition-colors duration-500" />
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,transparent_0%,var(--bg)_90%)] pointer-events-none duration-500" />
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,transparent_0%,var(--bg)_90%)] pointer-events-none transition-colors duration-500" />
 
       {/* SUBTLE GRAIN / NOISE */}
       <div className="noise-overlay opacity-[0.03]" />
@@ -182,18 +51,18 @@ const Hero = () => {
       {/* CURSOR GLOW TRAIL / SPOTLIGHT MASK (Desktop Only) */}
       {!isMobile && (
         <>
-          <motion.div 
-            style={{ 
-              left: springX, 
+          <motion.div
+            style={{
+              left: springX,
               top: springY,
               translateX: '-50%',
               translateY: '-50%'
             }}
             className="fixed w-[500px] h-[500px] z-5 pointer-events-none bg-[var(--floating-icon)] rounded-full blur-3xl opacity-50"
           />
-          <motion.div 
-            style={{ 
-              left: mouseX, 
+          <motion.div
+            style={{
+              left: mouseX,
               top: mouseY,
               translateX: '-50%',
               translateY: '-50%'
@@ -216,107 +85,103 @@ const Hero = () => {
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0 z-50 flex items-center justify-center px-10 bg-[var(--bg)] transition-colors duration-500"
           >
-            <div
-              className="tracking-[0.1em] uppercase text-center leading-[1.2] px-10 text-[var(--text)] drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
-              style={{ 
-                fontFamily: 'var(--font-mono)',
-                fontSize: isMobile ? 'clamp(20px, 8vw, 40px)' : '92.5px'
-              }}
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1 }}
+              className="text-[clamp(20px,4.5vw,56px)] font-black tracking-[0.25em] uppercase italic text-center leading-tight"
             >
-              <LetterAnimation text="WE BUILD SYSTEMS" />
-              <LetterAnimation text="THAT DOMINATE." delayOffset={1.5} />
-            </div>
+              <motion.span
+                animate={{
+                  textShadow: [
+                    "0 0 5px rgba(255,255,255,0.2)",
+                    "0 0 25px rgba(255,255,255,0.8)",
+                    "0 0 5px rgba(255,255,255,0.2)"
+                  ]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="block text-white"
+              >
+                WE BUILD SYSTEMS
+              </motion.span>
+
+              <span className="block text-white/40 blur-[3px] mt-2">
+                THAT DOMINATE
+              </span>
+            </motion.h2>
           </motion.div>
         ) : (
-          /* 4. MAIN PREMIUM CONTENT WITH 3D PARALLAX */
+          /* 4. MAIN PREMIUM CONTENT */
           <motion.div
             key="main"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.5, delay: 0.2 }}
-            style={{ rotateX, rotateY, perspective: 1200 }}
-            className="relative z-10 w-full max-w-7xl flex flex-col items-center select-none pt-12 md:pt-0 transform-gpu"
+            className="relative z-10 w-full max-w-7xl flex flex-col items-center select-none pt-12 md:pt-0"
           >
-            <Particles active={stage === 'main'} />
+            {/* 1. TYPOGRAPHY - BLOCKY HOMIES Studio */}
+            <div className="flex flex-col items-center w-full relative mb-12 md:mb-16">
+              {/* THE HALO GLOW */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-amber-500/20 rounded-full blur-[100px] md:blur-[180px] pointer-events-none z-0" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100px] h-[100px] md:w-[200px] md:h-[200px] bg-amber-400/40 rounded-full blur-[40px] md:blur-[80px] pointer-events-none z-0" />
 
-            {/* LAYER 1: MAIN HEADING (Deepest Parallax) */}
-            <motion.div 
-              style={{ x: lx1, y: ly1 }}
-              className="flex flex-col items-center w-full"
-            >
-              <motion.h1 
-                className="text-[clamp(60px,15vw,220px)] leading-[0.8] text-white uppercase mb-2 select-none"
-                style={{ 
-                  fontFamily: 'var(--font-display)',
-                  textShadow: '8px 8px 0px rgba(255,255,255,0.1), 15px 15px 30px rgba(0,0,0,0.5)'
-                }}
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="relative z-10 text-[clamp(60px,18vw,240px)] font-black leading-none text-white uppercase font-['Inter'] tracking-[-0.05em] drop-shadow-[5px_5px_0px_#333] md:drop-shadow-[15px_15px_0px_#333]"
               >
-                H-<span className="text-[#FFC107] drop-shadow-[0_0_35px_rgba(255,193,7,0.7)]" style={{ fontFamily: 'var(--font-accent)' }}>𝕆𝕄</span>-IES
+                H<span className="text-amber-400 font-extralight drop-shadow-[0_0_20px_rgba(251,191,36,0.7)]">𝕆𝕄</span>IES
               </motion.h1>
 
-              <div className="relative">
-                <motion.h1 
-                  style={{ x: lx2, y: ly2, fontFamily: 'var(--font-accent)' }}
-                  className="text-[clamp(24px,6vw,90px)] font-black leading-none tracking-[0.6em] uppercase text-[var(--text-muted)] mt-[-1vw]"
-                >
-                  STUDIO
-                </motion.h1>
-                {/* Mirror Reflection */}
-                <motion.h1 
-                  style={{ x: lx2, y: ly2, fontFamily: 'var(--font-accent)' }}
-                  className="absolute left-0 right-0 top-[70%] text-[clamp(24px,6vw,90px)] font-black leading-none tracking-[0.6em] uppercase text-white/5 mt-[-1vw] scale-y-[-1] blur-[2px] pointer-events-none"
-                >
-                  STUDIO
-                </motion.h1>
-              </div>
-            </motion.div>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-[clamp(40px,10vw,120px)] font-black leading-none text-white mt-[-2vw] font-['Syne'] italic drop-shadow-[4px_4px_0px_#333] md:drop-shadow-[10px_10px_0px_#333]"
+              >
+                Studio
+              </motion.h1>
 
-            {/* LAYER 2: TAGLINE */}
-            <motion.div 
-              style={{ x: lx3, y: ly3 }}
-              className="mt-10 overflow-hidden px-4"
-            >
-              <p className="font-mono text-[clamp(9px,1.1vw,13px)] tracking-[0.4em] uppercase text-[var(--text-muted)] font-black leading-relaxed">
-                HARDWARE & SOFTWARE SOLUTIONS
-              </p>
-            </motion.div>
+              {/* TAGLINE */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="mt-12 md:mt-20 overflow-hidden px-4"
+              >
+                <p className="text-[clamp(10px,1.5vw,16px)] tracking-[0.25em] uppercase text-white font-black leading-relaxed">
+                  SOFTWARE - HARDWARE DEVELOPMENT
+                </p>
+              </motion.div>
+            </div>
 
-            {/* LAYER 3: DESCRIPTION */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.7 }}
-              transition={{ delay: 0.8, duration: 1 }}
-              className="mt-8 md:mt-10 text-[clamp(13px,1.4vw,16px)] text-[var(--text)] max-w-md md:max-w-2xl mx-auto leading-relaxed font-light px-6"
-            >
-              To make something special, you have to build it from scratch. <br />
-              We are a team of engineers who design and build custom hardware 
-              and software solutions. <br className="hidden md:block" />
-              To make something special, you just have to believe it special.
-            </motion.p>
 
-            {/* LAYER 4: BUTTONS (Magnetic) */}
+
+            {/* 5. BUTTONS (PILL STYLING) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.8 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-5 mt-10 md:mt-14 w-full px-8 sm:px-12"
+              transition={{ delay: 0.8, duration: 0.8 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16 md:mt-24 w-full px-8"
             >
-              <MagneticButton
+              <button
                 onClick={handleOpenModal}
-                data-cursor-text="START_MISSION"
-                className="group relative w-full sm:w-auto min-w-[180px] md:min-w-[220px] px-8 py-3.5 md:py-4 bg-[var(--text)] text-[var(--bg)] font-black text-[10px] md:text-[11px] tracking-[0.25em] uppercase rounded-full overflow-hidden shadow-2xl"
+                className="w-full sm:w-auto min-w-[240px] md:min-w-[280px] px-10 py-5 md:py-6 bg-[#E5E5E5] text-black font-black text-xs md:text-sm tracking-[0.2em] uppercase rounded-[2rem] hover:scale-105 transition-all shadow-xl active:scale-95"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--bg)]/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                 START PROJECT
-              </MagneticButton>
+              </button>
 
-              <MagneticButton
+              <button
                 onClick={() => window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}`, '_blank')}
-                data-cursor-text="BOOK_CALL"
-                className="w-full sm:w-auto min-w-[180px] md:min-w-[220px] px-8 py-3.5 md:py-4 bg-transparent border border-[var(--border)] text-[var(--text)] font-black text-[10px] md:text-[11px] tracking-[0.25em] uppercase rounded-full hover:bg-[var(--text)]/5 hover:border-[var(--text)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                className="w-full sm:w-auto min-w-[240px] md:min-w-[280px] px-10 py-5 md:py-6 bg-[#E5E5E5] text-black font-black text-xs md:text-sm tracking-[0.2em] uppercase rounded-[2rem] hover:scale-105 transition-all shadow-xl active:scale-95"
               >
                 BOOK CALL
-              </MagneticButton>
+              </button>
             </motion.div>
           </motion.div>
         )}

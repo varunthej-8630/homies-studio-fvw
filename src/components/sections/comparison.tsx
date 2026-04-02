@@ -96,9 +96,9 @@ const Comparison: React.FC = () => {
               <div className="text-[var(--bg)] opacity-40 text-[10px] md:text-xs font-black tracking-[0.3em] uppercase font-mono">
                 THE OTHERS
               </div>
-              <div className="text-[var(--bg)] text-right text-[10px] md:text-xs font-black tracking-[0.3em] uppercase font-mono flex items-center justify-end gap-4">
-                <span className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(245,166,35,0.8)]" />
-                HOMIES STUDIO
+              <div className="text-[var(--bg)] text-right text-[10px] md:text-xs font-black tracking-[0.3em] uppercase font-mono flex items-center justify-end gap-2 md:gap-4">
+                <span className="w-2 md:w-2.5 h-2 md:h-2.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(245,166,35,0.8)]" />
+                H-<span className="text-amber-600">𝕆𝕄</span>-IES STUDIO
               </div>
             </div>
 
