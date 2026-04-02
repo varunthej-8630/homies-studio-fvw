@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Search } from 'lucide-react';
 import type { Project } from '../../data/projects';
@@ -65,6 +65,15 @@ const Projects = () => {
   const [activeCategory, setActiveCategory] = useState<string | 'All'>('All');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // CUSTOM EVENT LISTENER FOR HERO INTEGRATION
+  useEffect(() => {
+    const handleSetFilter = (e: any) => {
+      if (e.detail) setActiveCategory(e.detail);
+    };
+    window.addEventListener('set-project-filter', handleSetFilter);
+    return () => window.removeEventListener('set-project-filter', handleSetFilter);
+  }, []);
 
   const filteredProjects = projects.filter((p) => {
     const matchesCategory = activeCategory === 'All' || p.category === activeCategory;

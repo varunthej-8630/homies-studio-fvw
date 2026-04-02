@@ -1,7 +1,7 @@
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
-import { X } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 import ProjectModal from '../modals/ProjectModal';
 
 // INITIALIZE EMAILJS
@@ -179,7 +179,7 @@ const Hero = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="relative z-10 text-[clamp(50px,18vw,240px)] font-black leading-none text-[var(--accent)] uppercase font-['Inter'] tracking-[-0.05em] drop-shadow-[5px_5px_0px_#333] mb-4 md:drop-shadow-[15px_15px_0px_#333] hover:text-amber-400 transition-colors duration-300 group cursor-pointer"
+                className="relative z-10 text-[clamp(50px,18vw,240px)] font-black leading-none text-[var(--text)] uppercase font-['Inter'] tracking-[-0.05em] drop-shadow-[5px_5px_0px_rgba(0,0,0,0.05)] mb-4 md:drop-shadow-[15px_15px_0px_rgba(0,0,0,0.05)] hover:text-amber-400 transition-colors duration-300 group cursor-pointer"
               >
                 H<span className="text-amber-400 font-extralight drop-shadow-[0_0_20px_rgba(251,191,36,0.7)]">𝕆𝕄</span>IES
               </motion.h1>
@@ -188,7 +188,7 @@ const Hero = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-[clamp(40px,10vw,120px)] font-black leading-none text-[var(--accent)] mt-[-2vw] font-['Syne'] italic drop-shadow-[4px_4px_0px_#333] md:drop-shadow-[10px_10px_0px_#333] hover:text-amber-400 transition-colors duration-300 cursor-pointer"
+                className="text-[clamp(40px,10vw,120px)] font-black leading-none text-[var(--text)] mt-[-2vw] font-['Syne'] italic drop-shadow-[4px_4px_0px_rgba(0,0,0,0.05)] md:drop-shadow-[10px_10px_0px_rgba(0,0,0,0.05)] hover:text-amber-400 transition-colors duration-300 cursor-pointer"
               >
                 Studio
               </motion.h1>
@@ -200,8 +200,8 @@ const Hero = () => {
                 transition={{ delay: 0.6 }}
                 className="mt-12 md:mt-20 overflow-hidden px-4"
               >
-                <p className="text-[clamp(10px,1.5vw,16px)] tracking-[0.25em] uppercase text-white font-black leading-relaxed">
-                  WE H𝕆𝕄IES DEVELOP BOTH HARDWARE & SOFTWARE PROJECTS
+                <p className="text-[clamp(10px,1.5vw,16px)] tracking-[0.25em] uppercase text-[var(--accent)] font-black leading-relaxed">
+                  WE H<span className="text-amber-400">𝕆𝕄</span>IES DEVELOP BOTH HARDWARE & SOFTWARE PROJECTS
                 </p>
               </motion.div>
             </div>
@@ -213,20 +213,42 @@ const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.8 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16 md:mt-24 w-full px-8"
+              className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16 md:mt-24 w-full px-8 flex-wrap"
             >
               <button
                 onClick={handleOpenProject}
-                className="w-full sm:w-auto min-w-[240px] md:min-w-[280px] px-10 py-5 md:py-6 bg-[#E5E5E5] text-black font-black text-xs md:text-sm tracking-[0.2em] uppercase rounded-[2rem] hover:scale-105 transition-all shadow-xl active:scale-95"
+                className="w-full sm:w-auto min-w-[240px] md:min-w-[280px] px-10 py-5 md:py-6 bg-[var(--text)] text-[var(--bg)] font-black text-xs md:text-sm tracking-[0.2em] uppercase rounded-[2rem] hover:scale-105 transition-all shadow-xl active:scale-95"
               >
                 START PROJECT
               </button>
 
               <button
                 onClick={handleOpenCall}
-                className="w-full sm:w-auto min-w-[240px] md:min-w-[280px] px-10 py-5 md:py-6 bg-[#E5E5E5] text-black font-black text-xs md:text-sm tracking-[0.2em] uppercase rounded-[2rem] hover:scale-105 transition-all shadow-xl active:scale-95"
+                className="w-full sm:w-auto min-w-[240px] md:min-w-[280px] px-10 py-5 md:py-6 bg-[var(--text)] text-[var(--bg)] font-black text-xs md:text-sm tracking-[0.2em] uppercase rounded-[2rem] hover:scale-105 transition-all shadow-xl active:scale-95"
               >
                 BOOK CALL
+              </button>
+
+              {/* NEW INSTANT DELIVERY CTA */}
+              <button
+                onClick={() => {
+                  const el = document.getElementById('work');
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                    window.dispatchEvent(new CustomEvent('set-project-filter', { detail: 'Instant Delivery' }));
+                  }
+                }}
+                className="w-full sm:w-auto min-w-[240px] md:min-w-[280px] px-10 py-5 md:py-6 bg-transparent border-2 border-white/20 text-white font-black text-xs md:text-sm tracking-[0.2em] uppercase rounded-xl hover:bg-white hover:text-black hover:border-white transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] active:scale-95 group"
+              >
+                <div className="flex items-center justify-center gap-3">
+                  Instant Deliveries
+                  <motion.span
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                  >
+                    <ArrowRight size={16} />
+                  </motion.span>
+                </div>
               </button>
             </motion.div>
           </motion.div>

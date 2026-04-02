@@ -21,6 +21,7 @@ export const categories = [
   'Biomedical & Agri',
   'Power & Electrical',
   'Web & Software',
+  'Instant Delivery',
   'Others'
 ];
 
@@ -366,5 +367,61 @@ export const projects: Project[] = [
     description: '3D interactive tool for visualizing circuit layouts and connectivity.',
     problem: 'Difficult to explain complex physical PCB designs remotely.',
     result: 'Immersive browser-based walkthroughs of internal prototypes.'
+  },
+
+  // --- INSTANT DELIVERY (READY-MADE SYSTEMS) ---
+  {
+    id: 'HS-INST001',
+    hsCode: 'HS-INST001',
+    title: 'AI Study Assistant',
+    category: 'Instant Delivery',
+    description: 'An intelligent study companion that uses LLMs to summarize notes, generate quizzes, and answer academic queries instantly.',
+    problem: 'Students struggle with information overload and lack personalized quiz tools.',
+    result: 'Delivered as a ready-to-use Python/React codebase with API integrations.'
+  },
+  {
+    id: 'HS-INST002',
+    hsCode: 'HS-INST002',
+    title: 'Hand Gesture Controller',
+    category: 'Instant Delivery',
+    description: 'Navigate your computer system or software using high-precision computer vision and real-time hand gesture recognition.',
+    problem: 'Accessibility issues for touchless interaction in workshops or medical zones.',
+    result: 'Instant deployment for Windows/Linux with pre-trained vision models.'
+  },
+  {
+    id: 'HS-INST003',
+    hsCode: 'HS-INST003',
+    title: 'Smart Surveillance System',
+    category: 'Instant Delivery',
+    description: 'AI-powered security system with real-time face detection, object tracking, and instant mobile alerts for anomaly detection.',
+    problem: 'Generic CCTV lacks proactive intelligence.',
+    result: 'Full system image for Raspberry Pi / Jetson Nano delivered instantly.'
+  },
+  {
+    id: 'HS-INST004',
+    hsCode: 'HS-INST004',
+    title: 'Portfolio Website (Futuristic UI)',
+    category: 'Instant Delivery',
+    description: 'Next-gen portfolio with smooth WebGL transitions, glassmorphism, and high-end animations designed for elite creators.',
+    problem: 'Development time for high-end cinematic portfolios is 4+ weeks.',
+    result: 'Ready-to-deploy Vite + Tailwind project with all animations included.'
+  },
+  {
+    id: 'HS-INST005',
+    hsCode: 'HS-INST005',
+    title: 'Instagram Automation Tool',
+    category: 'Instant Delivery',
+    description: 'Boost your social presence with autonomous engagement, smart scheduling, and AI-driven hashtag analytics.',
+    problem: 'Manual social media management is time-consuming.',
+    result: 'Python-based automation script with secure login and analytics dashboard.'
+  },
+  {
+    id: 'HS-INST006',
+    hsCode: 'HS-INST006',
+    title: 'Resume Builder AI',
+    category: 'Instant Delivery',
+    description: 'Generate ATS-optimized resumes in seconds using AI that analyzes your career path and suggests high-impact keywords.',
+    problem: 'Users struggle with ATS formatting and keyword optimization.',
+    result: 'Complete web app source code with OpenAI integration and PDF generation.'
   }
 ];
