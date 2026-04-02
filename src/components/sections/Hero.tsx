@@ -332,7 +332,8 @@ const Hero = () => {
                     }
 
                     
-                    window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+                    const sanitizedNumber = (import.meta.env.VITE_WHATSAPP_NUMBER || '917416636417').replace(/\D/g, '');
+                    window.location.href = `https://wa.me/${sanitizedNumber}?text=${encodeURIComponent(msg)}`;
                     setIsSubmittingCall(false);
                     setShowCallSuccess(true);
                   }}

@@ -18,7 +18,8 @@ const Contact: React.FC = () => {
 
     const message = `Hello Homies Studio Team,\nMy name is ${name}.\n\nI am interested in your services.\nHere are my details:\n\nEmail: ${email}\nProject Type: ${projectType}\nProject Title: ${projectTitle}\nBudget: ${budget}\n\nDescription: ${details}\n\nI would like to connect and discuss this further.\nPlease let me know the next steps.\n\nThank you.`;
     
-    window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+    const sanitizedNumber = (import.meta.env.VITE_WHATSAPP_NUMBER || '917416636417').replace(/\D/g, '');
+    window.location.href = `https://wa.me/${sanitizedNumber}?text=${encodeURIComponent(message)}`;
     
     setTimeout(() => {
       setFormStatus("sent");
@@ -112,7 +113,10 @@ const Contact: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-6 py-8 border-b border-[var(--border)] hover:border-[var(--border-hover)] transition-colors group cursor-pointer" onClick={() => window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}`, '_blank', 'noopener,noreferrer')}>
+              <div className="flex items-center gap-6 py-8 border-b border-[var(--border)] hover:border-[var(--border-hover)] transition-colors group cursor-pointer" onClick={() => {
+                const sanitizedNumber = (import.meta.env.VITE_WHATSAPP_NUMBER || '917416636417').replace(/\D/g, '');
+                window.location.href = `https://wa.me/${sanitizedNumber}`;
+              }}>
                 <div className="w-12 h-12 rounded-2xl bg-[var(--card)] border border-[var(--border)] flex items-center justify-center flex-shrink-0 group-hover:border-[var(--text)] transition-all">
                   <Phone size={18} className="text-[var(--text-muted)] group-hover:text-[#f5a623]" />
                 </div>

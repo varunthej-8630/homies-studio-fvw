@@ -200,7 +200,10 @@ const Projects = () => {
               </div>
 
               <button
-                  onClick={() => window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=Hi%20Homies!%20🚀%0AName:%20Guest%0AProject:%20${encodeURIComponent(selectedProject.title)}`, '_blank', 'noopener,noreferrer')}
+                  onClick={() => {
+                    const sanitizedNumber = (import.meta.env.VITE_WHATSAPP_NUMBER || '917416636417').replace(/\D/g, '');
+                    window.location.href = `https://wa.me/${sanitizedNumber}?text=Hi%20Homies!%20🚀%0AName:%20Guest%0AProject:%20${encodeURIComponent(selectedProject.title)}`;
+                  }}
                  className="mt-16 w-full py-6 bg-[var(--text)] text-[var(--bg)] font-black text-xs tracking-widest rounded-2xl flex items-center justify-center gap-4 hover:bg-[#f5a623] hover:text-black transition-all uppercase group"
               >
                  GET QUOTE FOR THIS SYSTEM <ExternalLink size={18} className="group-hover:rotate-45 transition-transform" />

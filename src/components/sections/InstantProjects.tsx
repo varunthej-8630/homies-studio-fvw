@@ -40,8 +40,9 @@ const InstantProjects: React.FC = () => {
 
   const handleOrder = (projectName: string) => {
     const msg = `Hi, I am interested in the project: ${projectName}. Please share more details and pricing.`;
-    const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
+    const sanitizedNumber = whatsappNumber.replace(/\D/g, '');
+    const waUrl = `https://wa.me/${sanitizedNumber}?text=${encodeURIComponent(msg)}`;
+    window.location.href = waUrl;
   };
 
   return (

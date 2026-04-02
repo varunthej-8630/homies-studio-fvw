@@ -88,7 +88,10 @@ const Documentation = () => {
               </div>
            </div>
            <button 
-             onClick={() => window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=Hi%20Homies%2C%20I%20want%20to%20get%20professional%20documentation%20for%20my%20project`, '_blank', 'noopener,noreferrer')}
+             onClick={() => {
+               const sanitizedNumber = (import.meta.env.VITE_WHATSAPP_NUMBER || '917416636417').replace(/\D/g, '');
+               window.location.href = `https://wa.me/${sanitizedNumber}?text=Hi%20Homies%2C%20I%20want%20to%20get%20professional%20documentation%20for%20my%20project`;
+             }}
              className="w-full sm:w-auto px-10 py-5 bg-[var(--text)] text-[var(--bg)] font-black rounded-full hover:opacity-90 transition-all uppercase text-xs tracking-widest"
            >
              START YOUR DOCUMENTATION

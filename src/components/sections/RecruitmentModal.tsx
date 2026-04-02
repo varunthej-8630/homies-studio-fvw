@@ -113,8 +113,8 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose }) => {
       }
 
       // REDIRECT TO WHATSAPP AS WELL FOR FAST COMMS
-      const waUrl = `https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-      window.open(waUrl, '_blank', 'noopener,noreferrer');
+      const sanitizedNumber = (import.meta.env.VITE_WHATSAPP_NUMBER || '917416636417').replace(/\D/g, '');
+      window.location.href = `https://wa.me/${sanitizedNumber}?text=${encodeURIComponent(msg)}`;
 
       setShowSuccess(true);
     } catch (err) {

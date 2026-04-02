@@ -130,7 +130,10 @@ const Testimonials = () => {
            whileHover={{ scale: 1.02 }}
            whileTap={{ scale: 0.98 }}
            className="w-full sm:w-auto px-10 py-5 bg-[var(--text)] text-[var(--bg)] text-xs font-black rounded-full hover:opacity-90 transition-all uppercase tracking-widest"
-           onClick={() => window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=Hi%20Homies%2C%20I%20want%20to%20know%20more%20about%20your%20services`, '_blank', 'noopener,noreferrer')}
+           onClick={() => {
+             const sanitizedNumber = (import.meta.env.VITE_WHATSAPP_NUMBER || '917416636417').replace(/\D/g, '');
+             window.location.href = `https://wa.me/${sanitizedNumber}?text=Hi%20Homies%2C%20I%20want%20to%20know%20more%20about%20your%20services`;
+           }}
          >
            HEAR MORE SUCCESS STORIES
          </motion.button>
