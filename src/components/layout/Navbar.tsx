@@ -99,8 +99,8 @@ const Navbar = () => {
 
         {/* CALL ACTION (White Pill in Image) */}
         <button
-          onClick={() => window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=Hi%20Homies%2C%20I%20want%20to%20book%20a%20call`, '_blank')}
-          className="w-10 h-12 rounded-2xl md:rounded-[1.25rem] flex items-center justify-center bg-white text-black hover:scale-105 transition-all duration-200 mt-2"
+          onClick={() => window.dispatchEvent(new CustomEvent('open-call-modal'))}
+          className="w-10 h-12 rounded-2xl md:rounded-[1.25rem] flex items-center justify-center bg-white text-black hover:scale-105 transition-all duration-200 mt-2 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
         >
           <PhoneCall size={20} />
         </button>

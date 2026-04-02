@@ -1,10 +1,19 @@
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { useState, useCallback, useRef, useEffect } from 'react';
+import emailjs from '@emailjs/browser';
 import { X } from 'lucide-react';
+import ProjectModal from '../modals/ProjectModal';
+
+// INITIALIZE EMAILJS
+emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
+
 
 const Hero = () => {
   const [stage, setStage] = useState<'intro' | 'main'>('intro');
-  const [openModal, setOpenModal] = useState(false);
+  const [openProjectModal, setOpenProjectModal] = useState(false);
+  const [openCallModal, setOpenCallModal] = useState(false);
+  const [isSubmittingCall, setIsSubmittingCall] = useState(false);
+  const [showCallSuccess, setShowCallSuccess] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // MOUSE POS FOR INTERACTIVE REVEAL / TRAIL
@@ -13,7 +22,20 @@ const Hero = () => {
   const springX = useSpring(mouseX, { stiffness: 100, damping: 30 });
   const springY = useSpring(mouseY, { stiffness: 100, damping: 30 });
 
-  const handleOpenModal = useCallback(() => setOpenModal(true), []);
+  const handleOpenProject = useCallback(() => {
+    setOpenProjectModal(true);
+  }, []);
+
+  const handleOpenCall = useCallback(() => {
+    setOpenCallModal(true);
+    setShowCallSuccess(false);
+  }, []);
+
+  useEffect(() => {
+    const handleTriggerCall = () => handleOpenCall();
+    window.addEventListener('open-call-modal', handleTriggerCall);
+    return () => window.removeEventListener('open-call-modal', handleTriggerCall);
+  }, [handleOpenCall]);
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
@@ -109,9 +131,32 @@ const Hero = () => {
                 WE BUILD SYSTEMS
               </motion.span>
 
-              <span className="block text-white/40 blur-[3px] mt-2">
-                THAT DOMINATE
-              </span>
+              <motion.span
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.08,
+                      delayChildren: 0.8
+                    }
+                  }
+                }}
+                className="block text-white mt-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] tracking-[0.4em] not-italic"
+              >
+                {"THAT DOMINATE".split("").map((char, i) => (
+                  <motion.span
+                    key={i}
+                    variants={{
+                      hidden: { opacity: 0, scale: 1.2, filter: 'blur(10px)' },
+                      visible: { opacity: 1, scale: 1, filter: 'blur(0px)' }
+                    }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    {char}
+                  </motion.span>
+                ))}
+              </motion.span>
             </motion.h2>
           </motion.div>
         ) : (
@@ -155,7 +200,7 @@ const Hero = () => {
                 className="mt-12 md:mt-20 overflow-hidden px-4"
               >
                 <p className="text-[clamp(10px,1.5vw,16px)] tracking-[0.25em] uppercase text-white font-black leading-relaxed">
-                  SOFTWARE - HARDWARE DEVELOPMENT
+                  WE H𝕆𝕄IES DEVELOP BOTH HARDWARE & SOFTWARE PROJECTS
                 </p>
               </motion.div>
             </div>
@@ -170,14 +215,14 @@ const Hero = () => {
               className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16 md:mt-24 w-full px-8"
             >
               <button
-                onClick={handleOpenModal}
+                onClick={handleOpenProject}
                 className="w-full sm:w-auto min-w-[240px] md:min-w-[280px] px-10 py-5 md:py-6 bg-[#E5E5E5] text-black font-black text-xs md:text-sm tracking-[0.2em] uppercase rounded-[2rem] hover:scale-105 transition-all shadow-xl active:scale-95"
               >
                 START PROJECT
               </button>
 
               <button
-                onClick={() => window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}`, '_blank')}
+                onClick={handleOpenCall}
                 className="w-full sm:w-auto min-w-[240px] md:min-w-[280px] px-10 py-5 md:py-6 bg-[#E5E5E5] text-black font-black text-xs md:text-sm tracking-[0.2em] uppercase rounded-[2rem] hover:scale-105 transition-all shadow-xl active:scale-95"
               >
                 BOOK CALL
@@ -187,92 +232,104 @@ const Hero = () => {
         )}
       </AnimatePresence>
 
-      {/* --- PREMIUM COMPREHENSIVE QUOTE MODAL --- */}
+      {/* --- STANDALONE PROJECT MODAL --- */}
+      <ProjectModal 
+        isOpen={openProjectModal}
+        onClose={() => setOpenProjectModal(false)}
+      />
+
+      {/* --- REFINED CALL BOOKING MODAL --- */}
       <AnimatePresence>
-        {openModal && (
+        {openCallModal && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setOpenModal(false)}
-              className="fixed inset-0 bg-[var(--bg)]/95 backdrop-blur-3xl z-[9000] transition-colors duration-500"
+              onClick={() => setOpenCallModal(false)}
+              className="fixed inset-0 bg-black/90 backdrop-blur-3xl z-[9000]"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 40 }}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed z-[10000] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] sm:w-[95%] max-w-2xl bg-[var(--surface)] border border-[var(--border)] p-8 sm:p-12 md:p-16 shadow-2xl flex flex-col items-center max-h-[90vh] overflow-y-auto scrollbar-hide text-[var(--text)] transition-colors duration-500"
+              className="fixed z-[10000] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-xl bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] p-8 sm:p-12 shadow-2xl flex flex-col items-center max-h-[90vh] overflow-y-auto"
             >
               <button
-                onClick={() => setOpenModal(false)}
-                className="absolute top-4 right-4 sm:top-8 sm:right-8 w-10 h-10 sm:w-12 sm:h-12 border border-[var(--border)] text-[var(--text-faint)] hover:text-[var(--text)] hover:border-[var(--text)] flex items-center justify-center transition-all group"
+                onClick={() => setOpenCallModal(false)}
+                className="absolute top-8 right-8 w-10 h-10 border border-white/10 text-white/40 hover:text-white hover:border-white/40 flex items-center justify-center rounded-full transition-all group"
               >
-                <X size={20} className="group-hover:rotate-90 transition-transform" />
+                <X size={18} className="group-hover:rotate-90 transition-transform" />
               </button>
 
-              <h2 className="text-3xl md:text-5xl font-black text-[var(--text)] tracking-tighter uppercase mb-2">INITIATE</h2>
-              <p className="text-[var(--text-faint)] text-[9px] font-mono tracking-widest uppercase mb-10 md:mb-12 underline underline-offset-8">Mission Protocol 1.0</p>
+              <div className="text-center w-full">
+                <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase mb-2">SCHEDULE</h2>
+                <p className="text-white/40 text-[9px] font-mono tracking-widest uppercase mb-12 underline underline-offset-8">Booking Protocol 1.1</p>
+              </div>
 
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  const name = formData.get('name');
-                  const email = formData.get('email');
-                  const phone = formData.get('phone');
-                  const category = formData.get('category');
-                  const budget = formData.get('budget');
-                  const vision = formData.get('project');
-
-                  const msg = `MISSION_START: 🚀\nID: ${name}\nCOMM: ${email}\nWA: ${phone}\nTYPE: ${category}\nEST: ${budget}\nVISION: ${vision}`;
-                  window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
-                  setOpenModal(false);
-                }}
-                className="w-full space-y-7 md:space-y-10"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="relative border-b border-[var(--border)] focus-within:border-[var(--text)] transition-colors pb-2">
-                    <input name="name" required placeholder="IDENTIFICATION (NAME) *" className="w-full bg-transparent outline-none text-[10px] font-bold uppercase tracking-widest text-[var(--text)] placeholder-[var(--text)]/10" />
-                  </div>
-                  <div className="relative border-b border-[var(--border)] focus-within:border-[var(--text)] transition-colors pb-2">
-                    <input name="email" type="email" required placeholder="COMM_CHANNEL (EMAIL) *" className="w-full bg-transparent outline-none text-[10px] font-bold uppercase tracking-widest text-[var(--text)] placeholder-[var(--text)]/10" />
-                  </div>
+              {showCallSuccess ? (
+                <div className="text-center py-10">
+                  <div className="w-16 h-16 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl shadow-[0_0_30px_rgba(34,197,94,0.3)]">✓</div>
+                  <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-tight">Booking Sent.</h3>
+                  <p className="text-white/40 text-sm max-w-xs mx-auto leading-relaxed uppercase tracking-wider font-medium">
+                    Redirecting to WhatsApp to finalize time.
+                  </p>
+                  <button onClick={() => setOpenCallModal(false)} className="mt-10 px-8 py-3 bg-white text-black font-black text-[10px] tracking-widest uppercase rounded-full hover:scale-105 transition-all">Close</button>
                 </div>
+              ) : (
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    setIsSubmittingCall(true);
+                    const formData = new FormData(e.currentTarget);
+                    const name = formData.get('name') as string;
+                    const purpose = formData.get('purpose');
+                    const details = formData.get('details');
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="relative border-b border-[var(--border)] focus-within:border-[var(--text)] transition-colors pb-2">
-                    <input name="phone" required placeholder="CONTACT_UPLINK (WA) *" className="w-full bg-transparent outline-none text-[10px] font-bold uppercase tracking-widest text-[var(--text)] placeholder-[var(--text)]/10" />
+                    const msg = `Hello Homies Studio Team,\nMy name is ${name}.\n\nI would like to book a call.\n\nPurpose: ${purpose}\nDetails: ${details}\n\nPlease let me know a suitable time to connect.\n\nThank you.`;
+                    
+                    try {
+                      // EMAIL JS WITH TIMEOUT
+                      const emailPromise = emailjs.send(
+                        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+                        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+                        {
+                          from_name: name,
+                          purpose: purpose,
+                          description: details,
+                          message: msg,
+                          to_email: 'info.homiesstudio@gmail.com'
+                        }
+                      );
+
+                      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 8000));
+                      await Promise.race([emailPromise, timeoutPromise]).catch(e => console.warn("Email delayed/fail", e));
+                    } catch (e) {
+                      console.error("Email failed", e);
+                    }
+
+                    
+                    window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+                    setIsSubmittingCall(false);
+                    setShowCallSuccess(true);
+                  }}
+                  className="w-full space-y-6"
+                >
+                  <div className="space-y-4">
+                    <input name="name" required placeholder="YOUR NAME" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/20 focus:border-white/30 transition-all" />
+                    <input name="purpose" required placeholder="PURPOSE OF CALL" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/20 focus:border-white/30 transition-all" />
+                    <textarea name="details" required placeholder="SHORT DESCRIPTION" rows={4} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/20 resize-none focus:border-white/30 transition-all" />
                   </div>
-                  <div className="relative border-b border-[var(--border)] focus-within:border-[var(--text)] transition-colors pb-2">
-                    <select name="category" required className="w-full bg-transparent outline-none text-[10px] font-bold uppercase tracking-widest text-[var(--text)] appearance-none cursor-pointer">
-                      <option value="" className="bg-[var(--surface)]">SYSTEM_TYPE (CATEGORY) *</option>
-                      <option value="WEB SYSTEM" className="bg-[var(--surface)]">WEB SYSTEM</option>
-                      <option value="EMBEDDED/IOT" className="bg-[var(--surface)]">EMBEDDED / IOT</option>
-                      <option value="ROBOTICS/AI" className="bg-[var(--surface)]">ROBOTICS / AI</option>
-                      <option value="BRANDING/UI" className="bg-[var(--surface)]">UI/UX BRANDING</option>
-                    </select>
-                  </div>
-                </div>
 
-                <div className="relative border-b border-[var(--border)] focus-within:border-[var(--text)] transition-colors pb-2">
-                  <select name="budget" required className="w-full bg-transparent outline-none text-[10px] font-bold uppercase tracking-widest text-[var(--text)] appearance-none cursor-pointer">
-                    <option value="" className="bg-[var(--surface)]">ESTIMATED_RESOURCES (BUDGET) *</option>
-                    <option value="UNDER ₹20K" className="bg-[var(--surface)]">UNDER ₹20K</option>
-                    <option value="₹20K - ₹50K" className="bg-[var(--surface)]">₹20K - ₹50K</option>
-                    <option value="₹50K - ₹1.5L" className="bg-[var(--surface)]">₹50K - ₹1.5L</option>
-                    <option value="₹1.5L+" className="bg-[var(--surface)]">₹1.5L+</option>
-                  </select>
-                </div>
-
-                <div className="relative border-b border-[var(--border)] focus-within:border-[var(--text)] transition-colors pb-2">
-                  <textarea name="project" required placeholder="MISSION_VISION (DESCRIBE YOUR VISION...) *" rows={2} className="w-full bg-transparent outline-none text-[10px] font-bold uppercase tracking-widest text-[var(--text)] placeholder-[var(--text)]/10 resize-none" />
-                </div>
-
-                <button type="submit" className="w-full py-5 md:py-6 bg-[var(--text)] text-[var(--bg)] font-black text-[10px] md:text-[11px] tracking-[0.4em] uppercase hover:opacity-90 transition-all relative group overflow-hidden">
-                  VERIFY & INITIATE MISSION →
-                </button>
-              </form>
+                  <button 
+                    disabled={isSubmittingCall}
+                    type="submit" 
+                    className={`w-full py-5 bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase rounded-full transition-all flex items-center justify-center gap-2 ${isSubmittingCall ? 'opacity-50 pointer-events-none' : 'hover:scale-[1.02] active:scale-95 shadow-[0_10px_30px_rgba(255,255,255,0.1)]'}`}
+                  >
+                    {isSubmittingCall ? 'PREPARING...' : 'CONFIRM & BOOK ON WHATSAPP →'}
+                  </button>
+                </form>
+              )}
             </motion.div>
           </>
         )}

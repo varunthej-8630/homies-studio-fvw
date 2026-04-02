@@ -16,7 +16,7 @@ const Contact: React.FC = () => {
     const budget = formData.get('budget');
     const details = formData.get('details');
 
-    const message = `Hi Homies Studio! 🚀\nName: ${name}\nEmail: ${email}\nProject: ${projectTitle}\nType: ${projectType}\nBudget: ${budget}\nDetails: ${details}`;
+    const message = `Hello Homies Studio Team,\nMy name is ${name}.\n\nI am interested in your services.\nHere are my details:\n\nEmail: ${email}\nProject Type: ${projectType}\nProject Title: ${projectTitle}\nBudget: ${budget}\n\nDescription: ${details}\n\nI would like to connect and discuss this further.\nPlease let me know the next steps.\n\nThank you.`;
     
     window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
     

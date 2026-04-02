@@ -1,72 +1,137 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, ArrowRight } from 'lucide-react';
 import emailjs from '@emailjs/browser';
+import { 
+  X, User, Mail, Phone, MapPin, 
+  Briefcase, GraduationCap, Brain, 
+  Globe, Check, Upload, MessageSquare, 
+  Calendar, Settings, Zap
+} from 'lucide-react';
+
+// INITIALIZE EMAILJS
+emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  selectedRole: string;
+  selectedRole?: string;
 }
 
-const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose, selectedRole }) => {
+const interestAreas = [
+  'AI/ML', 'Web Development', 'App Development', 
+  'IoT / Embedded', 'Robotics', 'Design / UI/UX', 
+  'Marketing / Social Media', 'Business / Operations'
+];
+
+const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const [form, setForm] = useState({
     name: '',
     email: '',
     phone: '',
-    role: selectedRole,
     location: '',
-    experience: '',
+    status: '', // Student/Freelancer/Professional
+    organization: '',
+    year: '',
+    interests: [] as string[],
+    skills: '',
+    tools: '',
+    hasProjects: 'No',
+    projectDetails: '',
     portfolio: '',
-    about: '',
+    motivation: '',
+    whatMakesDifferent: '',
     availability: '',
-    rate: '',
   });
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  // Sync role if updated via prop
-  React.useEffect(() => {
-    setForm(f => ({ ...f, role: selectedRole }));
-  }, [selectedRole]);
+  const [resume, setResume] = useState<File | null>(null);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const toggleInterest = (interest: string) => {
+    setForm(prev => ({
+      ...prev,
+      interests: prev.interests.includes(interest) 
+        ? prev.interests.filter(i => i !== interest)
+        : [...prev.interests, interest]
+    }));
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!form.name) newErrors.name = 'Protocol name required';
+    if (!form.email || !/^\S+@\S+\.\S+$/.test(form.email)) newErrors.email = 'Secure email required';
+    if (!form.phone) newErrors.phone = 'Uplink frequency required';
+    if (!form.motivation) newErrors.motivation = 'Your drive is needed';
+    if (form.interests.length === 0) newErrors.interests = 'Select at least one sector';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-
+    if (!validate()) return;
+    
+    setIsSubmitting(true);
+    setSubmitError(null);
     try {
-      await emailjs.send(
-        import.meta.env.VITE_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      const msg = `Hello Homies Studio Team,\nMy name is ${form.name}.\n\nI want to Join the Homies!\n\nBackground: ${form.status} at ${form.organization} ${form.year ? `(Year ${form.year})` : ''}\nInterests: ${form.interests.join(', ')}\nMotivation: ${form.motivation}\nAvailability: ${form.availability}\n${resume ? `Resume Ready: ${resume.name} (I'll attach it manually below)` : ''}\n\nThank you.`;
+
+
+      // EMAIL JS SEND WITH FULL PAYLOAD (Removed large attachment to avoid 413 error)
+      const emailPromise = emailjs.send(
+        "service_wk9xnio",
+        "template_f9tlf8l",
         {
-          to_email: import.meta.env.VITE_RECRUITMENT_TARGET_EMAIL,
-          applicant_name: form.name,
-          applicant_email: form.email,
-          applicant_phone: form.phone,
-          applying_role: form.role,
-          location: form.location,
-          experience: form.experience,
-          portfolio: form.portfolio,
-          about_yourself: form.about,
-          availability: form.availability,
-          compensation: form.rate,
-          cv_note: 'CV attached separately via upload',
+          from_name: form.name,
+          from_email: form.email,
+          phone: form.phone,
+          message: msg,
+          status: form.status,
+          organization: form.organization,
+          interests: form.interests.join(', '),
+          motivation: form.motivation,
+          resume_name: resume ? resume.name : 'No resume',
+          project_type: 'RECRUITMENT',
+          project_title: 'HOMIES ENLISTMENT',
+          to_email: 'info.homiesstudio@gmail.com'
         },
-        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+        "Ni-K4p5KCay07Ma_S"
       );
-      setSubmitted(true);
-      setTimeout(() => {
-        const waMsg = `Hi Homies! I just applied as a ${form.role}. Portfolio: ${form.portfolio}`;
-        window.open(`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)}`, '_blank');
-      }, 1500);
+
+      // Timeout after 8 seconds
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 8000));
+      
+      try {
+        await Promise.race([emailPromise, timeoutPromise]);
+      } catch (e: any) {
+        console.warn("Mail delayed or failed, proceeding to WhatsApp", e);
+        alert(`Uplink Warning:\nStatus: ${e.status}\nText: ${e.text}`);
+      }
+
+      // REDIRECT TO WHATSAPP AS WELL FOR FAST COMMS
+      const waUrl = `https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+      window.open(waUrl, '_blank');
+
+      setShowSuccess(true);
     } catch (err) {
-      console.error(err);
-      setError('Something went wrong. Try WhatsApp instead.');
+      console.error("Critical submission error:", err);
+      setSubmitError("Uplink failed. Please try WhatsApp directly.");
+    } finally {
+      setIsSubmitting(false);
     }
-    setLoading(false);
   };
+
+  useEffect(() => {
+    if (!isOpen) {
+      setShowSuccess(false);
+      setErrors({});
+    }
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
@@ -75,202 +140,338 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose, selectedRole }) =>
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] bg-[var(--bg)]/90 backdrop-blur-md flex items-start justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-4"
           onClick={onClose}
         >
           <motion.div
-            initial={{ scale: 0.95, y: 20, opacity: 0 }}
-            animate={{ scale: 1, y: 0, opacity: 1 }}
-            exit={{ scale: 0.95, y: 20, opacity: 0 }}
-            className="w-full max-w-2xl bg-[var(--surface)] border border-[var(--border)] rounded-3xl p-8 md:p-12 relative my-8 shadow-2xl transition-colors duration-500"
+            initial={{ scale: 0.9, opacity: 0, y: 30 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 30 }}
+            className="w-full max-w-2xl bg-[#080808] border border-white/10 rounded-[2.5rem] p-8 md:p-12 relative shadow-[0_0_50px_rgba(255,255,255,0.05)] overflow-y-auto max-h-[90vh] custom-scrollbar"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
+            {/* CLOSE */}
             <button
               onClick={onClose}
-              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-[var(--text)]/10 text-[var(--text-faint)] hover:bg-[var(--text)]/20 hover:text-[var(--text)] flex items-center justify-center text-xs transition-all duration-300"
+              className="absolute top-8 right-8 w-10 h-10 rounded-full border border-white/10 text-white/30 hover:text-white hover:border-white/40 flex items-center justify-center transition-all bg-white/5 z-10"
             >
-              <X size={14} />
+              <X size={18} />
             </button>
 
-            {submitted ? (
-              <div className="text-center py-20 animate-in fade-in zoom-in duration-500">
-                <div className="text-6xl mb-6">🤝</div>
-                <h3 className="text-3xl font-black text-[var(--text)] mb-3 tracking-tighter">Application Received.</h3>
-                <p className="text-[var(--text-faint)] text-sm max-w-xs mx-auto leading-relaxed">
-                  We'll review your profile and hit you up within 48 hours. Stay obsessed.
+            {showSuccess ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-16 text-white"
+              >
+                <div className="w-20 h-20 bg-white/10 text-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                  <Check size={40} strokeWidth={3} />
+                </div>
+                <h2 className="text-4xl font-black mb-4 tracking-tighter uppercase">MISSION ACCEPTED</h2>
+                <p className="text-white/40 text-[10px] sm:text-xs max-w-sm mx-auto leading-relaxed uppercase tracking-[0.2em] font-medium font-mono">
+                  Application received. <br/>We will review and contact you soon.
                 </p>
                 <button
                   onClick={onClose}
-                  className="mt-10 text-[10px] tracking-[0.2em] uppercase text-[var(--text-faint)] hover:text-[var(--text)] transition-colors"
+                  className="mt-12 px-12 py-5 bg-white text-black font-black text-[10px] tracking-[0.4em] uppercase rounded-full hover:scale-105 transition-all shadow-xl"
                 >
-                  Close Window
+                  Return to Home Base
                 </button>
-              </div>
+              </motion.div>
             ) : (
-              <>
-                <div className="mb-10">
-                  <p className="text-[10px] tracking-[0.3em] uppercase text-[var(--text-faint)] mb-2 font-mono italic">// JOIN THE HOMIES</p>
-                  <h2 className="text-3xl font-black text-[var(--text)] mb-1 uppercase tracking-tighter transition-colors">You want in?</h2>
-                  <p className="text-sm text-[var(--text-muted)] border-l-2 border-amber-500 pl-4 mt-4 transition-colors">
-                    Applying as: <span className="text-[var(--text)] font-semibold ml-1">{form.role}</span>
+              <form onSubmit={handleSubmit} className="space-y-12">
+                <div>
+                  <p className="text-[10px] tracking-[0.5em] uppercase text-white/20 mb-3 font-mono">// JOIN THE HOMIES</p>
+                  <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-6">Enlist Now.</h2>
+                  <p className="text-white/40 text-[10px] font-medium uppercase tracking-[0.2em] leading-relaxed max-w-md">
+                    "We don’t hire for roles. We build people. If you are passionate, you belong here."
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-1">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
-                    <div className="border-b border-[var(--border)] focus-within:border-[var(--text)]/40 hover:border-[var(--border-hover)] transition-colors mb-7">
+                {/* PERSONAL INFO */}
+                <div className="space-y-8">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50 flex items-center gap-4">
+                    <span className="w-8 h-px bg-white/20"></span> 01 / Personal Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all px-6">
+                      <User size={14} className="text-white/20 group-focus-within:text-white transition-colors" />
                       <input
                         required
                         placeholder="FULL NAME *"
-                        className="w-full bg-transparent text-[var(--text)] text-sm placeholder-[var(--text-faint)] outline-none py-2 font-bold uppercase tracking-tight"
+                        className={`w-full bg-transparent py-4 pl-4 outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/20 transition-all ${errors.name ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border-white/10 focus-within:border-white/30'}`}
                         value={form.name}
                         onChange={e => setForm({ ...form, name: e.target.value })}
                       />
+                      {errors.name && <p className="absolute -bottom-5 left-1 text-[7px] text-red-500 uppercase font-black tracking-widest">{errors.name}</p>}
                     </div>
-                    <div className="border-b border-[var(--border)] focus-within:border-[var(--text)]/40 hover:border-[var(--border-hover)] transition-colors mb-7">
+                    <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all px-6">
+                      <Mail size={14} className="text-white/20 group-focus-within:text-white transition-colors" />
                       <input
                         required
                         type="email"
                         placeholder="EMAIL ADDRESS *"
-                        className="w-full bg-transparent text-[var(--text)] text-sm placeholder-[var(--text-faint)] outline-none py-2 font-bold uppercase tracking-tight"
+                        className={`w-full bg-transparent py-4 pl-4 outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/20 transition-all ${errors.email ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border-white/10 focus-within:border-white/30'}`}
                         value={form.email}
                         onChange={e => setForm({ ...form, email: e.target.value })}
                       />
+                      {errors.email && <p className="absolute -bottom-5 left-1 text-[7px] text-red-500 uppercase font-black tracking-widest">{errors.email}</p>}
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
-                    <div className="border-b border-[var(--border)] focus-within:border-[var(--text)]/40 hover:border-[var(--border-hover)] transition-colors mb-7">
+                    <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all px-6">
+                      <Phone size={14} className="text-white/20 group-focus-within:text-white transition-colors" />
                       <input
                         required
-                        placeholder="WHATSAPP NUMBER *"
-                        className="w-full bg-transparent text-[var(--text)] text-sm placeholder-[var(--text-faint)] outline-none py-2 font-bold uppercase tracking-tight"
+                        placeholder="PHONE NUMBER *"
+                        className="w-full bg-transparent py-4 pl-4 outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/20"
                         value={form.phone}
                         onChange={e => setForm({ ...form, phone: e.target.value })}
                       />
                     </div>
-                    <div className="border-b border-[var(--border)] focus-within:border-[var(--text)]/40 hover:border-[var(--border-hover)] transition-colors mb-7">
-                      <select
-                        required
-                        className="w-full bg-transparent text-[var(--text)] text-sm placeholder-[var(--text-faint)] outline-none py-2 font-bold uppercase tracking-tight appearance-none cursor-pointer"
-                        value={form.role}
-                        onChange={e => setForm({ ...form, role: e.target.value })}
-                      >
-                        <option value="EMBEDDED SYSTEMS ENGINEER" className="bg-[var(--surface)]">EMBEDDED SYSTEMS ENGINEER</option>
-                        <option value="ROBOTICS & MOTION ENGINEER" className="bg-[var(--surface)]">ROBOTICS & MOTION ENGINEER</option>
-                        <option value="IoT & CONNECTIVITY SPECIALIST" className="bg-[var(--surface)]">IoT & CONNECTIVITY SPECIALIST</option>
-                        <option value="HARDWARE & FPGA ENGINEER" className="bg-[var(--surface)]">HARDWARE & FPGA ENGINEER</option>
-                        <option value="AI/ML & VISION ENGINEER" className="bg-[var(--surface)]">AI/ML & VISION ENGINEER</option>
-                        <option value="FULL STACK WEB DEVELOPER" className="bg-[var(--surface)]">FULL STACK WEB DEVELOPER</option>
-                        <option value="PCB & CIRCUIT DESIGNER" className="bg-[var(--surface)]">PCB & CIRCUIT DESIGNER</option>
-                        <option value="SIMULATION & CONTROL ENGINEER" className="bg-[var(--surface)]">SIMULATION & CONTROL ENGINEER</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
-                    <div className="border-b border-[var(--border)] focus-within:border-[var(--text)]/40 hover:border-[var(--border-hover)] transition-colors mb-7">
+                    <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all px-6">
+                      <MapPin size={14} className="text-white/20 group-focus-within:text-white transition-colors" />
                       <input
-                        required
-                        placeholder="CITY / LOCATION *"
-                        className="w-full bg-transparent text-[var(--text)] text-sm placeholder-[var(--text-faint)] outline-none py-2 font-bold uppercase tracking-tight"
+                        placeholder="LOCATION (OPTIONAL)"
+                        className="w-full bg-transparent py-4 pl-4 outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/20"
                         value={form.location}
                         onChange={e => setForm({ ...form, location: e.target.value })}
                       />
                     </div>
-                    <div className="border-b border-[var(--border)] focus-within:border-[var(--text)]/40 hover:border-[var(--border-hover)] transition-colors mb-7">
+                  </div>
+                </div>
+
+                {/* BACKGROUND */}
+                <div className="space-y-8">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50 flex items-center gap-4">
+                    <span className="w-8 h-px bg-white/20"></span> 02 / Background
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all px-6">
+                      <Briefcase size={14} className="text-white/20" />
                       <select
                         required
-                        className="w-full bg-transparent text-[var(--text)] text-sm appearance-none cursor-pointer placeholder-[var(--text-faint)] outline-none py-2 font-bold uppercase tracking-tight"
-                        value={form.experience}
-                        onChange={e => setForm({ ...form, experience: e.target.value })}
+                        className="w-full bg-transparent py-4 pl-4 outline-none text-xs font-bold uppercase tracking-wider text-white appearance-none cursor-pointer"
+                        value={form.status}
+                        onChange={e => setForm({ ...form, status: e.target.value })}
                       >
-                        <option value="" disabled className="bg-[var(--surface)]">EXPERIENCE LEVEL *</option>
-                        <option value="Student" className="bg-[var(--surface)]">STUDENT</option>
-                        <option value="<1 Year" className="bg-[var(--surface)]">&lt; 1 YEAR</option>
-                        <option value="1–3 Years" className="bg-[var(--surface)]">1–3 YEARS</option>
-                        <option value="3–5 Years" className="bg-[var(--surface)]">3–5 YEARS</option>
-                        <option value="5+ Years" className="bg-[var(--surface)]">5+ YEARS</option>
+                        <option value="" className="bg-[#080808]">STATUS *</option>
+                        <option value="Student" className="bg-[#080808]">Student</option>
+                        <option value="Freelancer" className="bg-[#080808]">Freelancer</option>
+                        <option value="Professional" className="bg-[#080808]">Professional</option>
                       </select>
                     </div>
+                    <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all px-6">
+                      <GraduationCap size={14} className="text-white/20 group-focus-within:text-white transition-colors" />
+                      <input
+                        placeholder="COLLEGE / COMPANY"
+                        className="w-full bg-transparent py-4 pl-4 outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/20"
+                        value={form.organization}
+                        onChange={e => setForm({ ...form, organization: e.target.value })}
+                      />
+                    </div>
+                    {form.status === 'Student' && (
+                      <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all px-6 md:col-span-2">
+                        <Calendar size={14} className="text-white/20" />
+                        <input
+                          placeholder="YEAR OF STUDY"
+                          className="w-full bg-transparent py-4 pl-4 outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/20"
+                          value={form.year}
+                          onChange={e => setForm({ ...form, year: e.target.value })}
+                        />
+                      </div>
+                    )}
                   </div>
+                </div>
 
-                  <div className="border-b border-[var(--border)] focus-within:border-[var(--text)]/40 hover:border-[var(--border-hover)] transition-colors mb-7">
-                    <input
-                      type="url"
-                      placeholder="PORTFOLIO / GITHUB / LINKEDIN URL"
-                      className="w-full bg-transparent text-[var(--text)] text-sm placeholder-[var(--text-faint)] outline-none py-2 font-bold uppercase tracking-tight"
-                      value={form.portfolio}
-                      onChange={e => setForm({ ...form, portfolio: e.target.value })}
-                    />
+                {/* SKILLS & INTERESTS */}
+                <div className="space-y-8">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50 flex items-center gap-4">
+                    <span className="w-8 h-px bg-white/20"></span> 03 / Skills & Interests
+                  </h3>
+                  <div className="space-y-4">
+                    <label className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 ml-1">Area of Interest (Multi-select) *</label>
+                    <div className="flex flex-wrap gap-2">
+                       {interestAreas.map(interest => (
+                         <button
+                           key={interest}
+                           type="button"
+                           onClick={() => toggleInterest(interest)}
+                           className={`px-4 py-2 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${form.interests.includes(interest) ? 'bg-white border-white text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'bg-white/5 border-white/10 text-white/40 hover:border-white/30'}`}
+                         >
+                           {interest}
+                         </button>
+                       ))}
+                    </div>
                   </div>
+                  <div className="space-y-4">
+                    <div className="group relative flex flex-col bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all p-6">
+                      <div className="flex items-center gap-3 mb-2 text-white/20 group-focus-within:text-white transition-colors">
+                        <Brain size={14} />
+                        <span className="text-[9px] font-black uppercase tracking-widest">Core Skills *</span>
+                      </div>
+                      <textarea
+                        placeholder="DESCRIBE YOUR POWER LEVEL..."
+                        className="w-full bg-transparent outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/10 resize-none pt-2"
+                        rows={2}
+                        value={form.skills}
+                        onChange={e => setForm({ ...form, skills: e.target.value })}
+                      />
+                    </div>
+                    <div className="group relative flex flex-col bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all p-6">
+                      <div className="flex items-center gap-3 mb-2 text-white/20 group-focus-within:text-white transition-colors">
+                        <Settings size={14} />
+                        <span className="text-[9px] font-black uppercase tracking-widest">Tools & Tech</span>
+                      </div>
+                      <textarea
+                        placeholder="E.G. ROS, TENSORFLOW, NEXT.JS"
+                        className="w-full bg-transparent outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/10 resize-none pt-2"
+                        rows={2}
+                        value={form.tools}
+                        onChange={e => setForm({ ...form, tools: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
 
-                  <div className="border-b border-[var(--border)] focus-within:border-[var(--text)]/40 hover:border-[var(--border-hover)] transition-colors mb-7">
-                    <textarea
+                {/* EXPERIENCE */}
+                <div className="space-y-8">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50 flex items-center gap-4">
+                    <span className="w-8 h-px bg-white/20"></span> 04 / Experience
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl">
+                      <div className="flex items-center gap-3">
+                        <Zap size={14} className="text-white/20" />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-white/40">Have you built any projects?</span>
+                      </div>
+                      <div className="flex gap-4">
+                        {['Yes', 'No'].map(opt => (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => setForm({ ...form, hasProjects: opt })}
+                            className={`px-6 py-2 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${form.hasProjects === opt ? 'bg-white border-white text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'bg-white/5 border-white/10 text-white/30'}`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {form.hasProjects === 'Yes' && (
+                      <div className="group relative flex flex-col bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all p-6">
+                        <textarea
+                          placeholder="MISSION LOGS (PROJECTS BUILT)..."
+                          className="w-full bg-transparent outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/10 resize-none"
+                          rows={3}
+                          value={form.projectDetails}
+                          onChange={e => setForm({ ...form, projectDetails: e.target.value })}
+                        />
+                      </div>
+                    )}
+                    <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all px-6">
+                       <Globe size={14} className="text-white/20 group-focus-within:text-white transition-colors" />
+                       <input
+                        placeholder="PORTFOLIO / GITHUB / LINKEDIN"
+                        className="w-full bg-transparent py-4 pl-4 outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/20"
+                        value={form.portfolio}
+                        onChange={e => setForm({ ...form, portfolio: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* UPLOAD */}
+                <div className="space-y-8">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50 flex items-center gap-4">
+                    <span className="w-8 h-px bg-white/20"></span> 05 / Resume
+                  </h3>
+                  <div 
+                    onClick={() => resumeInputRef.current?.click()}
+                    className="border border-dashed border-white/10 rounded-2xl p-12 flex flex-col items-center justify-center gap-4 hover:border-white/30 transition-all cursor-pointer group bg-white/[0.02]"
+                  >
+                     <input 
+                      type="file" 
+                      ref={resumeInputRef} 
+                      className="hidden" 
+                      onChange={(e) => setResume(e.target.files ? e.target.files[0] : null)}
+                      accept="application/pdf"
+                     />
+                     <Upload size={32} className={`transition-all transform ${resume ? 'text-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'text-white/10 group-hover:text-white group-hover:-translate-y-1'}`} />
+                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-white text-center">
+                       {resume ? `RESUME READY: ${resume.name}` : 'Upload CV / Resume (REQUIRED *)'}
+                     </span>
+                     <span className="text-[8px] uppercase text-white/20">{resume ? 'CLICK TO CHANGE' : 'PDF FORMAT ONLY (MAX 5MB)'}</span>
+                  </div>
+                </div>
+
+                {/* MOTIVATION */}
+                <div className="space-y-8">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50 flex items-center gap-4">
+                    <span className="w-8 h-px bg-white/20"></span> 06 / Motivation
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="group relative flex flex-col bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all p-6">
+                       <label className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 mb-2">Why do you want to join Homies Studio? *</label>
+                       <textarea
+                        required
+                        placeholder="YOUR DRIVE..."
+                        className="w-full bg-transparent outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/10 resize-none pt-2"
+                        rows={3}
+                        value={form.motivation}
+                        onChange={e => setForm({ ...form, motivation: e.target.value })}
+                      />
+                    </div>
+                    <div className="group relative flex flex-col bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all p-6">
+                       <label className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 mb-2">What makes you different?</label>
+                       <textarea
+                        placeholder="YOUR UNIQUE EDGE..."
+                        className="w-full bg-transparent outline-none text-xs font-bold uppercase tracking-wider text-white placeholder-white/10 resize-none pt-2"
+                        rows={3}
+                        value={form.whatMakesDifferent}
+                        onChange={e => setForm({ ...form, whatMakesDifferent: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* AVAILABILITY */}
+                <div className="space-y-8">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50 flex items-center gap-4">
+                    <span className="w-8 h-px bg-white/20"></span> 07 / Availability
+                  </h3>
+                  <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-2xl focus-within:border-white/30 transition-all px-6">
+                    <MessageSquare size={14} className="text-white/20" />
+                    <select
                       required
-                      placeholder="TELL US ABOUT YOURSELF... WHAT HAVE YOU BUILT? *"
-                      rows={4}
-                      className="w-full bg-transparent text-[var(--text)] text-sm placeholder-[var(--text-faint)] outline-none py-2 font-bold uppercase tracking-tight resize-none"
-                      value={form.about}
-                      onChange={e => setForm({ ...form, about: e.target.value })}
-                    ></textarea>
+                      className="w-full bg-transparent py-5 pl-4 outline-none text-xs font-bold uppercase tracking-wider text-white appearance-none cursor-pointer"
+                      value={form.availability}
+                      onChange={e => setForm({ ...form, availability: e.target.value })}
+                    >
+                      <option value="" className="bg-[#080808]">AVAILABLE TIME *</option>
+                      <option value="Part-time" className="bg-[#080808]">Part-time</option>
+                      <option value="Full-time" className="bg-[#080808]">Full-time</option>
+                      <option value="Flexible" className="bg-[#080808]">Flexible</option>
+                    </select>
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
-                    <div className="border-b border-[var(--border)] focus-within:border-[var(--text)]/40 hover:border-[var(--border-hover)] transition-colors mb-7">
-                      <select
-                        required
-                        className="w-full bg-transparent text-[var(--text)] text-sm appearance-none cursor-pointer outline-none py-2 font-bold uppercase tracking-tight"
-                        value={form.availability}
-                        onChange={e => setForm({ ...form, availability: e.target.value })}
-                      >
-                        <option value="" disabled className="bg-[var(--surface)]">AVAILABILITY *</option>
-                        <option value="Full-time" className="bg-[var(--surface)]">Full-time</option>
-                        <option value="Part-time" className="bg-[var(--surface)]">Part-time</option>
-                        <option value="Project-based" className="bg-[var(--surface)]">Project-based</option>
-                        <option value="Internship" className="bg-[var(--surface)]">Internship</option>
-                      </select>
-                    </div>
-                    <div className="border-b border-[var(--border)] focus-within:border-[var(--text)]/40 hover:border-[var(--border-hover)] transition-colors mb-7">
-                      <select
-                        required
-                        className="w-full bg-transparent text-[var(--text)] text-sm appearance-none cursor-pointer outline-none py-2 font-bold uppercase tracking-tight"
-                        value={form.rate}
-                        onChange={e => setForm({ ...form, rate: e.target.value })}
-                      >
-                        <option value="" disabled className="bg-[var(--surface)]">EXPECTED COMPENSATION *</option>
-                        <option value="Unpaid Internship" className="bg-[var(--surface)]">Unpaid Internship</option>
-                        <option value="₹5k–15k/mo" className="bg-[var(--surface)]">₹5k–15k/mo</option>
-                        <option value="₹15k–30k/mo" className="bg-[var(--surface)]">₹15k–30k/mo</option>
-                        <option value="₹30k–50k/mo" className="bg-[var(--surface)]">₹30k–50k/mo</option>
-                        <option value="₹50k+/mo" className="bg-[var(--surface)]">₹50k+/mo</option>
-                        <option value="Per Project" className="bg-[var(--surface)]">Per Project</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="border border-dashed border-[var(--border)] rounded-xl p-6 text-center hover:border-[var(--text)]/30 transition-colors cursor-pointer text-[var(--text-faint)] text-[10px] tracking-wider uppercase relative mb-4">
-                    <input type="file" accept=".pdf,.doc,.docx" className="absolute inset-0 opacity-0 cursor-pointer" />
-                    <Upload size={18} className="mx-auto mb-2 opacity-30" />
-                    DROP YOUR CV HERE (PDF, max 5MB)
-                  </div>
-
-                  {error && <p className="text-red-500 text-[10px] uppercase font-bold tracking-widest text-center my-4">{error}</p>}
+                  {submitError && (
+                    <p className="text-[10px] text-red-500 font-bold uppercase text-center mt-4 animate-pulse">
+                     {submitError}
+                    </p>
+                  )}
 
                   <button
-                    disabled={loading}
+                    disabled={isSubmitting}
                     type="submit"
-                    className={`w-full mt-6 py-4 bg-[var(--text)] text-[var(--bg)] text-[10px] font-black tracking-[0.25em] uppercase rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 group ${loading ? 'opacity-50 pointer-events-none' : ''}`}
+                    className={`w-full py-6 bg-white text-black font-black text-xs tracking-[0.4em] uppercase rounded-2xl transition-all flex items-center justify-center gap-2 group ${isSubmitting ? 'opacity-50 pointer-events-none' : 'hover:scale-[1.02] shadow-[0_10px_40px_rgba(255,255,255,0.1)] active:scale-95'}`}
                   >
-                    {loading ? 'SENDING...' : 'SUBMIT APPLICATION'} <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    {isSubmitting ? 'INITIATING RECRUITMENT PROTOCOL...' : 'Join the Homies →'}
                   </button>
 
-                  <p className="text-center text-[9px] text-[var(--text-faint)] mt-4 tracking-wider uppercase">
-                    We read every application personally. expect a reply within 48 hours.
-                  </p>
-                </form>
-              </>
+                <p className="text-center text-[9px] text-white/10 tracking-[0.5em] uppercase font-mono italic">
+                   TRANSMISSION SECURED // END OF FORM.
+                </p>
+              </form>
             )}
           </motion.div>
         </motion.div>
@@ -279,5 +480,4 @@ const RecruitmentModal: React.FC<Props> = ({ isOpen, onClose, selectedRole }) =>
   );
 };
 
-export { RecruitmentModal };
 export default RecruitmentModal;
